@@ -979,6 +979,168 @@ vue2
     >    + 以请求体的方式要设置请求头的`Content-Type`属性；
     >      + 传递的字符串为`xxx=xxx&xxx=xxx`格式，`Content-Type:application/x-www-form-urlencoded`；
     >      + 传递的字符串为对象的格式，`Content-Type:application/json`；
+  
++ axios拦截器
+
+  + ![image-20211107231537132](img/image-20211107231537132.png)
+
+  + ![image-20211107231602680](img/image-20211107231602680.png)
+
+  + ![image-20211107231717526](img/image-20211107231717526.png)
+
+  + ![image-20211107231815863](img/image-20211107231815863.png)
+
+  + ![image-20211107231850799](img/image-20211107231850799.png)
+
+    + > 可以在响应拦截器把loading效果给关闭；
+
+  + proxy跨域代理
+
+    + 场景：如果后端给我们的接口没有开启CORS跨域资源共享，我们在开发时又不能因此耽误了进度，可以自己开启跨域代理；
+    
+    + ![image-20211108013957926](img/image-20211108013957926.png)
+    
+    + ![image-20211108014010029](img/image-20211108014010029.png)
+    
+    + 开启proxy跨域代理
+    
+      1. 如果==只有一个根路径==，可以用如下方式；
+    
+         + 封装一个工具类模块，创造一个小axios，配置好根路径为自己项目在自己服务器上的根路径，即在浏览运行时的地址栏的根路径；request.js
+    
+           ```js
+           import axios from 'axios'
+           
+           const request = axios.create({
+             // 本地的根路径
+             baseURL: 'http://localhost:8081'
+           })
+           
+           export default request
+           
+           ```
+    
+         + 在项目根路径新建一个 vue.config.js 文件，里面的根路径就是当会替换掉我们本地的根路径；
+    
+           ```js
+           module.exports = {
+             devServer: {
+               // 是接口真正的根路径
+               proxy: 'http://localhost:8080'
+             }
+           }
+           
+           ```
+    
+         + 发起请求时仍然没变；
+    
+           ```vue
+           <template>
+             <div>
+               <button @click="getinfo">点击</button>
+               <button @click="getinfo1">点击1</button>
+             </div>
+           </template>
+           
+           <script>
+           // 导入小axios
+           import request from '@/api/request.js'
+           export default {
+             methods: {
+               async getinfo() {
+                 // 请求的都是同一个根路径，因为配置文件只有一个根路径
+                 const { data: res } = await request.get('/axios')
+                 console.log(res)
+               },
+               async getinfo1() {
+                 // // 请求的都是同一个根路径
+                 const { data: res } = await request.get('/get')
+                 console.log(res)
+               }
+             }
+           }
+           </script>
+           
+           <style></style>
+           
+           ```
+    
+      2. 如果实际开发中有多个根路径，就不要用上面的简单吗配置，使用这一种：
+    
+         + 由于实际开发中可能会有很多的根路径，所以就可以在vue.config.js里配置多条根路径；
+    
+           > 注意：一旦有多条根路径，就不能配置全局根路径了，转而代之是在uri前面用占位符替代；而上面的第一种，就可以配置全局根路径；
+    
+           ```js
+           module.exports = {
+             devServer: {
+               proxy: {
+                 //   /api任意取的名字
+                 '/api': {
+                   // 请求的真实根路径
+                   target: 'http://localhost:8080',
+                   ws: true,
+                   // 开启代理，会在本地创建一个虚拟的服务器，虚拟服务器请求到的数据给浏览器；服务器和服务器的数据交互不会有跨域问题
+                   changeOrigin: true,
+                   // 把以/api开头的字符串替换成空
+                   pathRewrite: {
+                     '^/api': ''
+                   }
+                 },
+                 // 这是另外一个根路径的代理
+                 '/foo': {
+                   target: 'http://localhost:100',
+                   ws: true,
+                   changeOrigin: true,
+                   pathRewrite: {
+                     '^/foo': ''
+                   }
+                 }
+               }
+             }
+           }
+           
+           ```
+    
+         + 数据请求的写法
+    
+           ```vue
+           <template>
+             <div>
+               <button @click="getinfo">点击</button>
+               <button @click="getinfo1">点击1</button>
+             </div>
+           </template>
+           
+           <script>
+           import axios from 'axios'
+           export default {
+             methods: {
+               async getinfo() {
+                 // 请求的都是不同的根路径，因为配置文件有两个根路径
+                 // 最后，/api/axios会被编译替换为http://localhost:8080/axios，api会被替换为''；
+                 const { data: res } = await axios.get('/api/axios')
+                 console.log(res)
+               },
+               async getinfo1() {
+                 // // 请求的都是不同根路径
+                 // /foo/app2 => http://localhost:100/app2
+                 const { data: res } = await axios.get('/foo/app2')
+                 console.log(res)
+               }
+             }
+           }
+           </script>
+           
+           <style></style>
+           
+           ```
+    
+         > 注意：
+         >
+         > 1. 每次更改配置文件，就要重启打包服务器；
+         > 2. vue.config.js是使用vue-cli创建的项目才有的配置文件；
+         > 3. 配置好proxy跨域代理之后，即使项目发布也不用改动前端代码；后端要开启cors资源共享；
 
 
 
@@ -1960,6 +2122,284 @@ export default {
      ```
 
 + ==总结：只要有用到 $emit() 方法，都是发送数据的一方；== 
+
+#### 组件之间的数据共享之vuex
+
++ 场景：父向子传值通过自定义属性；子向父传值通过自定义事件；不相干的组件或者说兄弟组件之间的传值通过eventBus；这三种组件之间的数据共享方式都是小范围的，如果要大范围之间的频繁数据共享，就要用vuex；什么是大范围数据共享，比如一个组件的数据共享出去被多个组件使用，那就是大范围；
+
++ ![image-20211107171218555](img/image-20211107171218555.png)
+
++ ![image-20211107171234744](img/image-20211107171234744.png)
+
++ ![image-20211107171248389](img/image-20211107171248389.png)
+
++ vuex的基本使用
+
+  + vuex和vue-router一样，都是vue全家桶一部分，要安装vuex模块；
+
+  + 以下的步骤是未通过vue-cli创建基于webpack的vue项目时，没有勾选安装vuex时，才要这么做：
+
+    + ![image-20211107172647600](img/image-20211107172647600.png)
+
+    + ![image-20211107172713524](img/image-20211107172713524.png)
+
+      > 注意：如果通过vue-cli创建项目时，有勾选vuex就不必手写上面的代码了；
+
++ vuex的核心：
+
+  + State
+
+    ![image-20211107180219902](img/image-20211107180219902.png)
+
+    组件中访问全局共享数据的第二种方式：（两种方式都可以使用，选择一种即可）
+
+    ![image-20211107182157161](img/image-20211107182157161.png)
+
+  + mutations
+
+    + 如果要修改state里的数据，不可以直接在组件里获取到并修改，只能在Mutation里定义函数去修改state里的数据；也就是说，组件里获取到的state里的数据是可读的，但是不可以在组件里修改，要在组件里调用Mutation里的修改State数据的函数；
+
+      ![image-20211107184733553](img/image-20211107184733553.png)
+
+    + 调用mutations里的函数，传参的情况
+
+      ![image-20211107190507424](img/image-20211107190507424.png)
+
+    + 以上是触发mutations里函数的第一种方式，接下来是第二种
+
+      ![image-20211107192723425](img/image-20211107192723425.png)
+
+  + actions
+
+    + 场景：如果要对state里的数据进行异步操作，首先不能在组件里直接获取到数据去直接操作；也不可以在mutations里的函数对state里数据去异步操作；只能在actions里的函数去触发对state数据修改的函数，然后异步代码写在actions里的函数；
+
+      ![image-20211107200928439](img/image-20211107200928439.png)
+
+      ![image-20211107200956533](img/image-20211107200956533.png)
+
+      ![image-20211107203611369](img/image-20211107203611369.png)
+
+      ![image-20211107205716918](img/image-20211107205716918.png)
+
+      > 注意：需要对state里的数据去修改操作等，只能在mutations里；
+
+      在组件中调用actions函数的第二种方式：
+
+      
+
+  + getters
+
+    + 相当于vuex里的计算属性；
+    + ![image-20211107211637477](img/image-20211107211637477.png)
+    + ![image-20211107211654893](img/image-20211107211654893.png)
+
+  + 总结：
+
+    + 对全局共享的数据的一切操作，都需要在vuex模块里；在组件里就是直接调用函数；
+    + 如果state里的数据要和组件里的表单元素实现数据双向绑定，当state里的数据被获取到时，可以绑定属性的形式绑定value赋值给它；再通过表单标签的change事件拿到事件对象的target的value，然后调用mutation里方法把value赋值给state里的数据；不能用v-model；因为一旦使用v-model，就等于在组件里直接修改state里的数据；
+
+  + 案例：
+
+    vuex模块（store文件夹里的index.js）
+
+    ```js
+    // 导入vue
+    import Vue from 'vue'
+    // 导入vuex
+    import Vuex from 'vuex'
+    // 把vuex安装为vue项目的插件
+    Vue.use(Vuex)
+    // 默认导出实例对象
+    export default new Vuex.Store({
+      // 存放公共数据的地方
+      state: {
+        count: 0
+      },
+      getters: {
+        // 是vuex的计算属性
+        showNum (state) {
+          return '当前最新的数据' + state.count + '!'
+        }
+      },
+      // mutations里的函数都有一个state形参
+      mutations: {
+        // 注意：在mutation里集中对state里的数据进行修改；
+        add (state) {
+          state.count++
+        },
+        // 定义一个在函数调用时可以传参的函数；
+        addN (state, n) {
+          state.count += n
+        },
+        sub (state) {
+          state.count -= 1
+        },
+        subN (state, n) {
+          state.count -= n
+        }
+      },
+      // actions里的函数都有一个contetx形参
+      actions: {
+        // 在这里处理异步任务
+        asyncAdd (context) {
+          setTimeout(() => {
+            // 调用mutations里的函数对数据去修改，不能直接在这里修改；在这函数里，主要是写异步任务；
+            context.commit('add')
+          }, 1000)
+        },
+        // 传递参数的情况
+        asyncAddN (context, n) {
+          setTimeout(() => {
+            context.commit('addN', n)
+          }, 1000)
+        },
+        asyncSub (context) {
+          setTimeout(() => {
+            context.commit('sub')
+          }, 1000)
+        },
+        asyncSubN (context, n) {
+          setTimeout(() => {
+            context.commit('subN', n)
+          }, 1000)
+        }
+      },
+      // 暂时没涉及到，没学
+      modules: {
+      }
+    })
+    
+    ```
+
+    在组件里对state里数据间接操作的第一种方法：
+
+    ```vue
+    <template>
+      <div>
+        <!-- 在组件中使用全局共享的数据，可以通过this.$store.全局数据名；在这里不用使用this； -->
+        <h1>{{$store.state.count}}</h1>
+        <h1>{{$store.getters.showNum}}</h1>
+        <button @click="btnHandler">+1</button>
+        <button @click="btnHandler2">+n</button>
+        <button @click="btnHandler3">+1 async</button>
+        <button @click="btnHandler4">+n async</button>
+    
+        <hr>
+      </div>
+    </template>
+    
+    <script>
+    export default {
+      methods: {
+        // 只能调用mutation里的函数对state里的数据进行修改，不能直接在组件里获取到state里的数据去修改；
+        btnHandler () {
+          this.$store.commit('add')
+        },
+        btnHandler2 () {
+          // 调用addN函数并传递实参;commit是调用mutations里的函数；
+          this.$store.commit('addN', 3)
+        },
+        btnHandler3 () {
+          // 调用actions里的异步任务；通过dispatch调用函数；
+          this.$store.dispatch('asyncAdd')
+        },
+        btnHandler4 () {
+          // 调用actions里的函数传递实参
+          this.$store.dispatch('asyncAddN', 20)
+        }
+      }
+    
+    }
+    </script>
+    
+    <style>
+    
+    </style>
+    
+    ```
+
+    在组件里对state里数据间接操作的第二种方法：
+
+    ```vue
+    <template>
+      <div>
+        <!-- 通过mapState函数把全局共享的state里的count数据，映射到计算属性里，以普通属性使用即可 -->
+        <h1>{{count}}</h1>
+        <!-- 使用getters里的属性 -->
+        <h1>{{showNum}}</h1>
+        <button @click="sub">-1</button>
+        <button @click="subN(10)">-N</button>
+        <button @click="asyncSub">-1 async</button>
+        <button @click="asyncSubN(100)">-N async</button>
+        <hr>
+      </div>
+    </template>
+    
+    <script>
+    // 按需导入函数从vuex
+    import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
+    
+    export default {
+      computed: {
+        // 在计算属性里使用mapState函数，把count变成一个计算属性；
+        ...mapState(['count']),
+        // 把getters里的属性映射到组件里
+        ...mapGetters(['showNum'])
+      },
+      methods: {
+        // 直接把mutation里的函数映射到组件里就可以直接使用
+        ...mapMutations(['sub', 'subN']),
+        // 把actions里的函数直接映射成为methods里的函数，可以直接使用
+        ...mapActions(['asyncSub', 'asyncSubN'])
+      }
+    
+    }
+    </script>
+    
+    <style>
+    
+    </style>
+    
+    ```
+
+    根组件
+
+    ```vue
+    <template>
+      <div>
+        <h1>根组件</h1>
+        <hr>
+        <Add></Add>
+        <Sub></Sub>
+    
+      </div>
+    </template>
+    
+    <script>
+    import Add from '@/components/add.vue'
+    import Sub from '@/components/sub.vue'
+    export default {
+      components: {
+        Add,
+        Sub
+      }
+    
+    }
+    </script>
+    
+    <style>
+    
+    </style>
+    
+    ```
+
+    
+
+    
+
+    
+
+    
 
 #### ref引用
 
@@ -4356,6 +4796,19 @@ export default {
   let str = 'hello';
     console.log(str.toUpperCase()); // HELLO
   ```
+  
++ `trim()`：去除首位空格；
+
+  ```js
+    let str = ' kkk  '
+   
+    // 去除字符串两端的空格，会返回一个新值
+    const a = str.trim()
+    console.log(str)  //还是有空格，trim()不会改变原字符串
+    console.log(a)  //去除首位空格
+  ```
+
+  
 
 ### 数字显示小数的api
 
