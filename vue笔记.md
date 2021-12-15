@@ -186,7 +186,7 @@ vue2
 
 + 事件修饰符
 
-  + js原生的阻止事件冒泡和阻止默认事件；
+  + js原生的阻止事件冒泡和阻止默认行为；
 
     ```js
      var a = document.getElementById('a');
@@ -202,7 +202,7 @@ vue2
       }
     ```
 
-  + `prevent`：阻止默认事件；
+  + `prevent`：阻止默认行为；
 
   + `stop`：阻止事件冒泡；
 
@@ -239,6 +239,10 @@ vue2
   + `once`：绑定的事件只触发一次；
 
   + `self`：只有当event.target是当前元素自身时才会触发事件处理函数，事件冒泡无法触发当前被self修饰的元素的事件；
+
+  + `native`：
+
+    + 如果一个封装好的组件默认是没有原生的事件的，比如click等这些事件，除非在封装组件时做了处理；因此，当我们在使用第三方组件库时，如果绑定了原生的事件没有起作用，那么就是这个组件没有这个事件，给这个事件添加原生事件修饰符即可；`<el-xxx @click.native></el-xxx>`；
 
 + 按键修饰符
 
@@ -558,6 +562,12 @@ vue2
 
 1. 先导入dayjs的库文件，就可以在window全局使用`dayjs()`方法；
 
+   ```js
+   npm install dayjs -S
+   ```
+
+   
+
 2. 直接调用`dayjs()`得到的是当前的时间，还未格式化成我们想要的格式； 
 
 3. 通过`dayjs(需要格式化的日期时间).format(最后的格式)`；
@@ -593,15 +603,61 @@ vue2
    </script>
    ```
 
-   
+
+
+
++ 可以使用dayjs设置相对时间：
+
+  + 下面是如果还要处理相对时间的其他操作，可以去下面的地方摸索；
+
+    ![image-20211113002114476](img/image-20211113002114476.png)
+
+    ![image-20211113002201286](img/image-20211113002201286.png)
+
+    ![image-20211113002225049](img/image-20211113002225049.png)
+
+    ![image-20211113002255242](img/image-20211113002255242.png)
+
+    
+
+  + 下面是处理相对时间的全部操作：
+
+    + 首先要在npm下载；
+
+    + 新建一个dayjs.js的工具类模块，在模块里完成相关的配置，并且声明全局过滤器，来格式化时间，然后在main.js里直接导入代码即可，不用导出和导入成员；
+
+      ```js
+      import Vue from 'vue'
+      // 初始化dayjs相关配置
+      import dayjs from 'dayjs'
+      import 'dayjs/locale/zh-cn'
+      import relativeTime from 'dayjs/plugin/relativeTime'
+      
+      // 配置使用处理相对时间
+      dayjs.extend(relativeTime)
+      
+      // 配置使用中文语言
+      dayjs.locale('zh-cn')
+      // 声明全局过滤器；把这个模块导入到main.js直接去加载，不用导出
+      Vue.filter('relativeTime', (val) => {
+        return dayjs(val).from(dayjs())
+      })
+      
+      ```
+
+      
+
+  
+
+  
 
 > 注意：过滤器只有在vue2可以使用，在vue3已经没有这个功能了；
 
 ### watch侦听器
 
-+ 要指明是侦听data里的哪个数据，把该数据名作为watch里的函数名，不用加this；
++ 要指明是侦听data或props里的哪个数据，把该数据名作为watch里的函数名，不用加this；
 
-+ 侦听器是监听data里的数据，data里的数据一旦变化，就会立即执行处理函数；
++ 侦听器是监听data或props里的数据，data里的数据一旦变化，就会立即执行处理函数；
 
 + 函数有两个形参，`newval`代表监听的数据变化后的新值，`oldval`代表监听的数据变化之前的旧值，新值在前，旧值在后；
 
@@ -783,6 +839,8 @@ vue2
 
 + 用途：当一个数据的值是由别的数据的变化决定的，就可以使用计算属性；
 
++ 主要应用场景：基于已经有的数据，衍生变形一些新数据出来，就可以使用计算属性；
+
 + 特点：主要是实现了代码的==复用==；
 
   ```html
@@ -841,6 +899,17 @@ vue2
 
 + `axios`方法里的`data`的值是一个对象，里面是以请求体的方式传递的参数；
 
++ 使用`axios`发起请求，不用手动设置请求头的`Content-Type:application/json`，会自动帮我们设置；如果是发送文件（包括图片文件）到服务器，请求头的要设置`Content-Type:multipart/form-data`，但是使用`axios`时也不用手动设置，我们需要做的是：
+
+  ```js
+  //上传文件是post请求
+  let fd = new FormData()
+  fd.append(需要上传的文件的属性名，需要上传的文件对象)
+  //最后把fd当成一个对象当成请求体参数，即当成data的属性值；
+  ```
+
+  > 当做完上面的事情之后，axios就自动帮我们设置好了Content-Type:multipart/form-data；
+
   + GET请求：
 
   ```js
@@ -849,7 +918,8 @@ vue2
       url: 'http://localhost:8080/axios',
       params: {
         dd: 555
-      }
+      },
+       headers: {}
     }).then((result) => {
       console.log(result)
       console.log(result.data)//这个才是真实服务器返回的数据
@@ -979,7 +1049,7 @@ vue2
     >    + 以请求体的方式要设置请求头的`Content-Type`属性；
     >      + 传递的字符串为`xxx=xxx&xxx=xxx`格式，`Content-Type:application/x-www-form-urlencoded`；
     >      + 传递的字符串为对象的格式，`Content-Type:application/json`；
-  
+
 + axios拦截器
 
   + ![image-20211107231537132](img/image-20211107231537132.png)
@@ -1141,6 +1211,7 @@ vue2
          > 1. 每次更改配置文件，就要重启打包服务器；
          > 2. vue.config.js是使用vue-cli创建的项目才有的配置文件；
          > 3. 配置好proxy跨域代理之后，即使项目发布也不用改动前端代码；后端要开启cors资源共享；
+         > 3. ==开发环境用proxy，生产环境用nginx反向代理，需要在服务器上配置nginx.conf文件，然后重启nginx==
 
 
 
@@ -1351,7 +1422,7 @@ vue2
 
 #### 自定义属性props节点
 
-+ 场景：组件被使用时，使用组件者需要自定义一个数值给组件实例对象的属性，此时组件封装时就需要使用props（具体看下面的案例）；
++ 场景：组件被使用时，使用组件者需要一个数值给组件实例对象的props属性，此时组件封装时就需要使用props（具体看下面的案例）；
 
 + props是组件的自定义属性，即自定义一个组件实例对象的属性，把属性的赋值权交给组件使用时，提高组件被使用的灵活性；在封装通用组件时，合理使用props可以极大提高组件的复用性；
 
@@ -1370,10 +1441,28 @@ vue2
   ```
 
   + props节点与data同级；
+
   + 数组里的元素是自定义的名字，必须是字符串；
+
   + 数组里的元素是当前组件实例对象的属性，跟data里的属性一样，在当前组件里，data里的属性怎么使用，数组里的元素就怎么被使用；
+
   + data里的属性有属性值，是封装者写死的，组件使用者无法初始化；props数组里的元素只是属性名，没有属性值，属性值要组件使用时被赋予；
-  + ==自定义属性是只读的，不可写；即只可以在页面显示出来，不可以更改自定义属性的值；==如果要改里面值，可以通过间接的方式把该值赋给data里属性，因为data里的属性是可读可写；具体看案例；
+
+  + **组件之间的传值，如果传递的是引用类型数据，两个组件共同指向同一个引用的数据，比如父组件向子组件传递数组，那么这两个组件就共同指向同一个数组，在子组件里对数组进行首尾操作或者splice，两个组件的数组都会同时变化；如果对子组件的数组进行替换，比如子组件里的props的数组被重新赋值为别的值，那就等于改变了子组件的数组指向，和父组件不是指向同一个数组，两个组件的数据不能保持同步，那么就会报错；因为通过props传值的方式，父组件里的传过去的值要和子组件里的props的值要保持同步，即要一样，一旦两个值不一样就会在终端发出警告；因此，如果要修改props里的数据，且数据是引用类型，且不想改变父组件的引用类型的数据，可以把值传给data里的数据，再去做修改；如果是基本类型的数据传递，要修改props里数据，只能传给data，因为基本类型的数据被改变，无法改变父组件里基本类型，数据不同步就会报警告；如果传递的是引用类型，且要父组件里的数据也变化，可以直接修改props里的数据，但是注意不能改变指向哦；**
+
+    + 如果父组件通过props传值给子组件时，父向子传递的是基本类型，子组件得到的props数据，要修改时只能传给data里的数据，不能直接修改，否则父子组件的数据无法保持同步；当间接修改了数据之后，又想使父组件里的数据也同时和子组件里修改后的数据同步，那么只能通过自定义事件，子向父传值，去修改；即除了数组，对象以外的数据，是无法保持同步；只能是通过自定义事件去间接保持同步；但是每次都要在子组件标签监听事件，如果数据太多就会显得代码臃肿；因此可以用下面两种方式，但是原理还是一样的，只是可以简化代码的书写：
+
+      + 使用到这两种技术的场景是：由父组件向子组件传递的数据，==既要被使用，又要被修改，且传递的数据是基本类型，且父子组件的数据保持同步==；
+
+        1. v-model指令添加到子组件的标签上：（如果从父组件传递给子组件的有多个数据，且多个数据都要在子组件里被修改，且是基本类型，不能多次使用v-model，只能使用一次；）
+
+           1. ![image-20211119181558351](img/image-20211119181558351.png)
+
+              ![image-20211119182318642](img/image-20211119182318642.png)
+
+           2. ![image-20211119183453898](img/image-20211119183453898.png)
+
+              ![image-20211119183621055](img/image-20211119183621055.png)
 
 + 在父组件中使用组件的语法格式
 
@@ -1482,14 +1571,15 @@ vue2
 + ```vue
    props: {
       // 自定义属性时出现驼峰，在组件使用时，在标签上建议以cmt-count的形式出现；不这样也不会报错；
+   	//在定义自定义属性时，如果出现xx-xxx，这种属性名，就要以引号包裹，或者转换成驼峰的形式；
       cmtCount: {
         // 值类型有两种可能时，可以这样子写；
         type: [Number, String],
         default: 0
-      }
+     }
   }
   ```
-
+  
 + 自定义定义属性的值类型是对象时，默认值要以函数形式返回一个对象：
 
   ![image-20211106195100266](img/image-20211106195100266.png)
@@ -1497,8 +1587,16 @@ vue2
 + props自定义属性的总结：
 
   + 封装组件时，通过props节点，设置自定义的属性名，该属性与data里的属性是同一级别的，data里的属性怎么用，它就怎么用；
+  
   + 封装好的组件里的自定义属性没有属性值；需要在使用组件时，通过在标签上面以标签的属性的形式把属性值传入，此时的属性值就被传入到被使用的组件里的自定义属性；
+  
   + 实际的应用，比如我们封装一个新闻的模块，这个组件需要被多次复用，且每次复用时，新闻的标题都是不一样的，那么就需要我们在封装组件时使用props节点自定义一个关于新闻标题的属性，每次使用组件时就直接在标签的自定义属性上传入标题即可；
+  
+  + > 做项目得出的重要结论：
+    >
+    > 通过路由显示的组件，如果要把这个组件的网络请求得到的数据传给它的子组件，以自定义属性的方式传时，第一次会出现undefined，然后第二次就会正常把值传过去（什么是第一次，第二次，就是父向子传值，如果父亲的数据变了，也会传给它的儿子，变化几次传几次；所以父亲第一次的数据是undefined，第二次请求到数据了才是正常的）；所以，如果在子组件自定义属性类型时，指定了数据类型是除了undefined之外的数据，就会报错；因此，除非万不得已，不要拿通过数据接口请求的数据，这是指在通过路由显示的组件是父组件的情况下，其他情况不用考虑；
+    >
+    > ![image-20211117181546029](img/image-20211117181546029.png)
 
 #### vue组件之间的样式冲突
 
@@ -2123,6 +2221,10 @@ export default {
 
 + ==总结：只要有用到 $emit() 方法，都是发送数据的一方；== 
 
++ > 注意：
+  >
+  > 使用eventbus传递数据，$emit是触发事件，当在某个组件先触发事件并传递数据过去时，如果接受数据的一方的组件还没有被创建，那么第一次触发事件，接受数据的组件就不会有接收到，因为这个接受的一方组件还没有被创建，那么就不能使用eventbus传递数据了；用自定义事件或者自定义属性；
+
 #### 组件之间的数据共享之vuex
 
 + 场景：父向子传值通过自定义属性；子向父传值通过自定义事件；不相干的组件或者说兄弟组件之间的传值通过eventBus；这三种组件之间的数据共享方式都是小范围的，如果要大范围之间的频繁数据共享，就要用vuex；什么是大范围数据共享，比如一个组件的数据共享出去被多个组件使用，那就是大范围；
@@ -2171,7 +2273,7 @@ export default {
 
   + actions
 
-    + 场景：如果要对state里的数据进行异步操作，首先不能在组件里直接获取到数据去直接操作；也不可以在mutations里的函数对state里数据去异步操作；只能在actions里的函数去触发对state数据修改的函数，然后异步代码写在actions里的函数；
+    + 场景：如果要对state里的数据进行异步操作，首先不能在组件里直接获取到数据去直接操作；也不可以在mutations里的函数对state里数据去异步操作；只能在actions里的函数去调用对state数据修改的mutations函数，然后异步代码写在actions里的函数；
 
       ![image-20211107200928439](img/image-20211107200928439.png)
 
@@ -3210,7 +3312,7 @@ export default {
 
     + 自定义指令在使用时，可以不传值，也可以传值；
 
-    + binding.value就是自定义组件传入的值，用法如下：
+    + binding.value就是自定义指令传入的值，用法如下：
 
       ```vue
       <template>
@@ -3915,7 +4017,7 @@ export default {
 
   + 特点：嵌套路由的特点是：切换到嵌套路由的父组件，可以在父组件切换子路由里的组件，仍然可以看到父组件；使用路由传参的特点：不是路由嵌套，而是不同的路由链接对应的是同一个组件，只是这个组件里的信息，数据发生了变化，组件结构不变，数据之所以会变化，是这个组件通过路由链接的Hash值拿到Hash值里的参数，根据拿到的参数去后台请求数据并把数据渲染出来；
 
-  + 注意：==多个hash值对应一个组件，或者一个hash值对应一个组件都会出现路由传参；==
+  + 注意：==多个hash值对应一个组件（动态路由），或者一个hash值对应一个组件都会出现路由传参；==
 
   + 路由传参之动态路由（params的方式），把要传递的参数放到`/`后面，这个参数叫路径参数；
 
@@ -4030,9 +4132,9 @@ export default {
     
         <router-link to="/home">首页</router-link>
         <!-- 动态路由的路由链接；多个Hash值对应同一个组件，传入路径参数； -->
-        <router-link to="/movie/1">电影1</router-link>
-        <router-link to="/movie/2">电影2</router-link>
-        <router-link to="/movie/3">电影3</router-link>
+        <router-link :to="/movie/1">电影1</router-link>
+        <router-link :to="/movie/2">电影2</router-link>
+        <router-link :to="/movie/3">电影3</router-link>
     
         <router-link to="/about">关于</router-link>
         <router-view></router-view>
@@ -4052,20 +4154,71 @@ export default {
     
     ```
 
+    > ==规定：路由传参就用路径参数的形式，动态路由也用路径参数的形式；以免和查询参数的形式混了；==
+    >
+    > ==动态路由就是多个hash值或者多个路由链接对应一个组件；==
+    >
+    > ==配置路由规则时，只要没有默认子路由，就都加name属性；所有的子路由的第一条都用默认子路由的形式；==
+    >
+    > ==在写路由链接的hash和路径参数时，有下面{}的方式，这是第二种写法，见下面的案例；params里的属性名要和路由规则里的自定义的参数名一样；==
+    >
+    > ```vue
+    > :to="{name:'articledetail', params: {articleId: artId}}"  记得绑定属性
+    > ```
+    >
+    > ```js
+    >   {
+    >     // 因为不知路径参数是什么，就只能自定义参数表示；推荐开启props属性，组件就可以自定义属性，自定义属性名也要和自定义参数名一样
+    >     path: '/articledetail/:articleId',
+    >     name: 'articledetail',
+    >     component: () => import('@/views/ArticleDetail/ArticleDetail.vue'),
+    >     props: true
+    >   }
+    > ```
+    >
+    > > 注意：通过路由显示的组件，没有和哪个组件是父子关系或者兄弟关系，所以从一个组件传递参数给路由组件只能是以路由传参的形式；而普通的组件，则有父子关系和兄弟关系，所以可以通过自定义属性和自定义事件等方式传递参数；
+    >
+    > 
+  
   + 路由传参之 query 的方式；
-
+  
     + 在路由链接传入查询参数，`?xx=xx$xx=xx`；
-
+  
       > `/xx`这个叫路径参数；
-
+  
     + 在声明路由规则时，只需要写一条路由规则即可，因为查询参数不会影响到前端路由在地址栏识别hash值，查询字符串相当于不存在；
-
+  
     + 在组件中获取参数，仍然要使用路由参数对象`$route`；
+  
+    + 在写路由链接的hash值和要传递的参数的第二种写法：
 
+      + ```vue
+            <div class="not-login" v-else>
+              <!-- 从我的页面去到登录页，由于登录页的代码不是设置this.$router.back()；因此为了能回到
+              我的页面，就要通过路由传参的方式，把当前的页面的hash值给传到登录页面的hash值；以query查询参数的方式；
+              -->
+              <img
+                src="./shouji.png"
+                alt=""
+                @click="
+                  $router.push({
+                    name: 'login',
+                    query: {
+                      ReturnUrl: '/entry/mine'
+                    }
+                  })
+                "
+              />
+              <p>登录/注册</p>
+            </div
+        ```
+    
+      + 
+    
     + 案例：
-
+    
       路由模块
-
+    
       ```js
       import Vue from 'vue'
       import VueRouter from 'vue-router'
@@ -4089,9 +4242,9 @@ export default {
       export default router
       
       ```
-
+  
       电影组件
-
+    
       ```vue
       <template>
         <div class="movie_container">
@@ -4112,9 +4265,9 @@ export default {
       </style>
       
       ```
-
+    
       在根组件声明路由链接并传递参数进去
-
+    
       ```vue
       <template>
         <div class="app_container">
@@ -4144,7 +4297,7 @@ export default {
       </style>
       
       ```
-
+    
       > 注意：
       >
       > 1. `$route`是路由的==参数对象；==
@@ -4152,7 +4305,7 @@ export default {
       > 3. 这个对象里的`fullPath`是完整的路由链接传入的字符串；
       > 4. 对象里的`path`属性值是Hash值；
       > 5. 路由传参可以只用params或者query的形式，两种用其中一种即可；
-
+    
       
 
 #### 编程式导航
@@ -4332,11 +4485,153 @@ export default {
 
 #### 黑马头条移动端制作
 
++ ==每次数据持久化都最后再操作；只要有对请求到data里的数据进行过修改操作，就要把数据持久化；数据持久化有两种，已经登录的，就通过调用接口把数据持久化到线上，那么在不同的设备登录，数据就会同步；如果未登录，就把数据持久化到本地==；
+
++ ==为了防止网络慢，用户多次行为导致会发起多个请求时，一定要添加loadding效果，在准备发起请求之前开启loadding，在请求结束后关闭loadding；比如，点击某个按钮发起请求时；==至于函数防抖，防止发起多次请求的使用场景在于，不能开启loadding的场景使用，因为开启loadding 就代表不能再使用这个功能了；比如，在搜索联想建议时，输入框每变化一次就会发起一次请求，这时为了防止多次没意义的请求，就要开启函数防抖，不能开启loadding，开启loaading之后，用户的输入框就不能键入文字了，用户体验极差；除了可以开启loadding，开启toast提示操作中，然后禁止背景点击，把时长延长，等到操作成功了就开启第二个toast，那么第一个toast就会自动关闭，这也是跟loadding相同的作用，可以防止网络慢用户多次点击发起多次请求；
+
++ ```js
+  `${这里面跟vue指令里面一样，都是些js表达式的}`
+  ```
+
++ popup弹出层组件，当打开时会创建组件，当关闭时组件并不会被销毁，因此当再次打开时组件里面的数据还会一样，如果在实际开发中发现使用弹出层里面的数据并不是我们想要的样子，可能就是这个原因，要使用v-if条件渲染，动态的创建和销毁组件；
+
++ 在调用数据请求api时，传入的数据都要在data里定义或者在data里拿；即data有就从data拿，data里没有就自己定义一个变量；
+
++ 使用flex布局，如果不给子元素设置宽度（主轴为x），这个不设置宽度的内容越多就会撑开自身，如果另外一个兄弟盒子有设置宽度也会被挤压，因为一旦父元素设置flex，子元素默认都是flex-shrink:1；就是超出父元素宽度会自动缩小；比如，
+
+  + ![image-20211120181811099](img/image-20211120181811099.png)
+
++ flex-grow就是分配剩余空间的多少；flex-shrink就是减小自身的宽度的多少去不至于超出父元素的宽度（主轴为x）；
+
++ 动态添加类名设置样式
+
+  + ![image-20211117005041080](img/image-20211117005041080.png)
+
 + 使用`vant`组件库：
   + 安装`vant`包；
   + 直接一次性导入所有的组件，开发时不用在意代码臃肿；等到要项目发布后，就会进行优化；一次性导入所有组件之后，就相当于全局注册好了，可以直接使用，下次使用别的组件也不用导入了；
   
-+ 首页：
++ 项目初始化：
+
+  + 创建vue项目时，这个最好也勾上
+    + ![image-20211108173957168](file://C:\toutiao_m\img\image-20211108173957168.png?lastModify=1636605417)
+
+  + 初始化项目目录
+    + 删除不要的文件；
+    + 在 src 目录下新增 api 文件夹（请求的数据的api），utils 文件夹（工具类模块），styles文件夹并新建index.less文件（全局样式表）；
+    + 每完成一个一个模块，就可以把项目提交到码云的远程仓库；
+
+  + rem适配
+
+    + [postcss-pxtorem](https://github.com/cuth/postcss-pxtorem) 是一款 PostCSS 插件，用于将自动 px 单位转化为 rem 单位，代码仍然使用px即可，打包时会自动转换；
+
+      + 安装`npm install postcss-pxtorem -D`；
+
+      + 项目根目录新建`postcss.config.js`的配置文件；
+
+        + ```js
+          // 先安装npm install postcss-pxtorem -D
+          // 新建这个配置文件，去vant文档的rem适配那里，复制下面的代码
+          // 这个postcss-pxtorem插件的作用是把项目里以px为单位自动转化为rem；也会把组件的单位给转化了；
+          
+          // postcss.config.js
+          module.exports = {
+            plugins: {
+              // 这些vue-cli已经帮我们配置好了
+              // autoprefixer: {
+              //   browsers: ['Android >= 4.0', 'iOS >= 8']
+              // },
+              'postcss-pxtorem': {
+                  //设置根字体大小，把px转化为rem
+                rootValue: 37.5,
+                // 所有属性都转换
+                propList: ['*']
+              }
+            }
+          }
+          
+          ```
+
+        + 在`.browserslistrc`配置文件，修改如下：
+
+          + ```js
+            # > 1%
+            # last 2 versions
+            # not dead
+            # 把上面的注释掉，正常上面就可以满足，只是可以兼容更细
+            
+            Android >= 4.0
+            iOS >= 8
+            
+            ```
+
+    + [lib-flexible](https://github.com/amfe/lib-flexible) 用于设置 rem 基准值，自动根据屏幕的变换设置html字体的大小，分成十份；
+
+      + 安装`npm i amfe-flexible`;
+      + - 在main.js导入，`import 'amfe-flexible'`；
+
+    + 注意：
+
+      + vant组件库是基于逻辑像素375px设计的组件，所以当在配置文件里把根字体大小设置为37.5px，组件正常显示；
+      + 而我们拿到的设计稿是750px的手机物理像素，即在手机显示的页面就是750px宽，但是在电脑同样的宽度只有375px宽；为了在开发时显示的与实际的手机宽度一样，我们采用的是电脑逻辑像素的375；由于我们安装了导入了flexible.js，在电脑的逻辑像素下，根字体大小为37.5；那么我们量取的设计图也必须是375px宽，但是我们的是750px；因此，要把设计图给缩小一半；但是，不能在ps里通过像素为单位缩小一半，否则设计稿里的图片就不是二倍图了；要在ps里的，在 Photoshop 中打开单位与标尺设置面板：菜单栏 -> 编辑 -> 首选项 -> 单位与标尺。将单位中的标尺和文字的单位修改为`点`；打开设置图像大小面板：菜单栏=》图像=》图像大小；关闭重新采样；将宽度单位设置为`点`；将高度单位设置为`点`；将宽度修改为 `375`，高度不用动（它会适应宽度自动调整）；点击确定完成修改。
+      + 调整之后，我们可以看到图像的大小变成了 375 点 x 667 点（144 ppi）。在 iPhone 6/7/8 设备下，1个点 = 2个物理像素，所以你看到我们导出的图片还是原来的二倍图。
+
+  + 把ui给我们的svg图标制作成字体图标，步骤（借助iconfont网站）：
+
+    1. ![image-20211109154805515](file://C:\toutiao_m\img\image-20211109154805515.png?lastModify=1636606072)
+
+    2. ![image-20211109154841112](file://C:\toutiao_m\img\image-20211109154841112.png?lastModify=1636606108)
+
+    3. ![image-20211109154858839](file://C:\toutiao_m\img\image-20211109154858839.png?lastModify=1636606120)
+
+    4. ![image-20211109154916901](file://C:\toutiao_m\img\image-20211109154916901.png?lastModify=1636606136)
+
+    5. ![image-20211109154932587](file://C:\toutiao_m\img\image-20211109154932587.png?lastModify=1636606147)
+
+    6. ![image-20211109154946944](file://C:\toutiao_m\img\image-20211109154946944.png?lastModify=1636606159)
+
+    7. ![image-20211109155537749](file://C:\toutiao_m\img\image-20211109155537749.png?lastModify=1636606169)
+
+    8. ![image-20211109155650596](file://C:\toutiao_m\img\image-20211109155650596.png?lastModify=1636606181)
+
+    9. ![image-20211109155937267](file://C:\toutiao_m\img\image-20211109155937267.png?lastModify=1636606191)
+
+    10. ![image-20211109160006551](file://C:\toutiao_m\img\image-20211109160006551.png?lastModify=1636606202)
+
+    11. 直接使用，字体类名就是icon.less文件里的`font-family: "xxx"`；
+
+    12. 去iconfont网站我的项目里，复制图标名使用
+
+    13. ![image-20211109160259658](file://C:\toutiao_m\img\image-20211109160259658.png?lastModify=1636606254)
+
+    14. ![image-20211109160306433](file://C:\toutiao_m\img\image-20211109160306433.png?lastModify=1636606270)
+
+        注意：
+
+        1. 在less文件中导入less文件，路径不能使用@，要使用相对路径的形式，否则会报错；
+        2. 在制作字体图标时，把图标类名和前缀名设置成一样的，在vant中才可以使用自己的图标和组件配合；
+
+  + vant组件库也有自己的图标，它们的图标可以单独用；也可以与它们的组件一起用；我们的图标也可以与它们的组件配合一起用；
+
+    + ![image-20211109164145386](file://C:\toutiao_m\img\image-20211109164145386.png?lastModify=1636606364)
+
+  + 配置路由页面，即先配置好路由规则，和创建由路由控制的空组件；
+
+    + 把每个由路由控制的组件都放在一个文件夹里，因为那个文件夹里可能还会放和那个组件相关的文件；
+
+    + 封装每个路由时，都给路由加名字，当使用vue调试工具时可以看到对应的名字；
+
+    + 配置路由规则时，也给路由规则起名字；如果有默认子路由，就不需要给路由规则加名字了；
+
+    + 配置路由规则使用懒加载导入；因为可以提高用户体验，加载速度会更快；
+
+      ```js
+      { path: 'problem', name: 'problem', component: () => import('@/views/Problem/Problem.vue') }
+      ```
+
+  + 给组件设置样式时，可以直接给组件加类名，那么该类名就是被加在组件模板的根元素上面；但是推荐直接在组件的style标签里使用/deep/，这样子代码看起来更干净；如果要给组件设置全局的样式，可以在全局样式表里设置一个类名，每次用到这个样式就直接给组件加这个类名，但是这样子更麻烦；可以定制主题；
+
++ **首页**：
 
   + 顶部和底部的组件是导航组件的tabbar和navbar；
 
@@ -4531,6 +4826,1119 @@ export default {
       ![image-20211107160858356](img/image-20211107160858356.png)
     
       ![image-20211107160716530](img/image-20211107160716530.png)
+  
++ **登录页**
+
+  + vant用到的组件：Toast，NavBar，CountDown，Field输入框，Form表单，button组件；
+  + 全局的样式放在第三方组件的样式后面，不然可能会被覆盖；
+  + 点击登录按钮
+    + 首先需要使用form表单组件包裹输入框和登录按钮；
+    + 表单里的登录按钮被点击有默认行为，会先校验输入框的格式；如果校验成功就会触发submit事件，处理函数的内容就是发起登录请求；
+    + 校验失败会有默认的错误提示，我们可以自定义错误提示，以toast提示的形式；
+
+  + 点击发送验证码
+    + 由于点击发送验证码的按钮也是form表单里的按钮，有默认行为就是校验表单里的所有输入框，触发submit事件；因此先用prevent把默认行为禁止；
+    + 可以通过ref拿到form组件的实例调用validate函数，单独校验手机号码是否正确；返回promise实例，可以使用try  catch，去处理失败后的事情；
+    + 校验成功就给按钮使用loading，禁止按钮点击，防止网络慢多次点击按钮，造成多次请求；等请求成功了就显示倒计时，把按钮隐藏；
+    + 校验失败了，就把loading效果关闭；
+  + 具体案例看项目源码；
+
+  
+
+  
+
+  + 登录请求时，要判断失败之后的处理方法，使用`try{}catch(e){}`；
+
+    + ![image-20211109235907752](file://C:\toutiao_m\img\image-20211109235907752-1636605292336.png?lastModify=1636605300)
+
+  + 在给标签的某个属性添加布尔值时，记得绑定属性，才是布尔值，否则就是字符串；
+
+  + token存储 ：
+
+    + token是向后端发起登录请求时，会响应到浏览器的数据，用于身份认证；
+
+    + 把token存在vuex容器最大的好处就是，数据是响应式的，只要state里的token数据发生了变化，就会驱动视图更新；如果存在本地存储，当token被清除了之后，页面与token相关的视图并不会马上更新，而是要经过刷新；因此，必须存在vuex容器；
+
+    + 由于token数据是会被大范围使用，就vuex容器来存储：
+
+      + 先封装本地存储的工具类模块；
+
+        ```js
+        // 设置本地存储
+        export const setItem = (name, value) => {
+          // 本地存储只有字符串才可以被存入；先判断下是不是字符串；
+          if (typeof value === 'object') {
+            value = JSON.stringify(value)
+          }
+          localStorage.setItem(name, value)
+        }
+        // 读取本地存储
+        export const getItem = (name) => {
+          let data = localStorage.getItem(name)
+          // 由于本地存储拿出来的数据也是字符串，如果是对象格式的字符串，就转为对象格式的；
+          try {
+            data = JSON.parse(data)
+            return data
+          } catch (e) {
+            return data
+          }
+        }
+        
+        // 删除本地存储
+        export const removeItem = (name) => {
+          localStorage.removeItem(name)
+        }
+        
+        ```
+
+      + 点击登录会获取到token，先把token赋值给state，再存入本地；
+
+        ```js
+        import Vue from 'vue'
+        import Vuex from 'vuex'
+        
+        import { setItem, getItem } from '@/utils/storage.js'
+        
+        Vue.use(Vuex)
+        // 避免字符串写错没提醒
+        const KEY = 'userToken'
+        
+        export default new Vuex.Store({
+          state: {
+            userToken: getItem(KEY)
+          },
+          mutations: {
+            setState(state, data) {
+              // 拿到token,第一时间把把token存到容器中，否则第一次进入页面容器中是没有token的，要刷新页面才有；
+              state.userToken = data
+              // 把token存到本地存储中，以防刷新数据，vuex容器中就没有了数据，可以通过本地存储拿到放到容器中；
+              setItem(KEY, data)
+            }
+          },
+          actions: {},
+          modules: {}
+        })
+        
+        ```
+
+        在登录的处理函数里调用setState函数
+
+        ```js
+         this.$store.commit('setState', res.data)
+        
+        ```
+
++ **我的页面**
+
+  + 使用的组件，button组件，image组件，cell单元格，grid宫格，dialog弹出框；
+
+  + 有时候修改组件的样式没生效，可能是权重问题，也可能是被覆盖了；比如，background-color:unset；可以这么设置把覆盖的颜色给重置掉；
+
+  + 登录状态时，我的页面有用户信息显示；未登录时，我的页面没有用户信息，用手机图标显示；
+
+    + 原理：通过判断在vuex容器中是否有token数据，有的话就是已经登录状态；无就是未登录；显示与隐藏就是通过v-if和v-else控制；点击登录通过路由导航到登录页面；登录成功就要返回上一级，从哪里来回哪里去；
+
+  + 用户退出登录
+
+    + 点击退出登录之后会弹出框，然后把vuex容器的token给修改为null；当vuex容器里的token修改为空之后，页面中使用到容器里token就会立即更新，因为数据驱动视图，容器里的数据也是响应式的；然后再把本地存储也设置为null；
+
+  + 我的页面用户个人资料渲染
+
+    + 原理：
+
+      1. 封装用户请求数据api；请求当前用户的个人资料需要token认证，即需要从state里拿到token并以请求头的形式发给后端；
+
+         > 注意：由于很多请求都需要token认证，因此可以通过axios请求拦截器统一配置；不然每次请求都配置一次很麻烦；
+
+      2. 在methods里写一个请求的方法；
+
+      3. 在created里调用方法；
+
++ **首页**
+
+  + 如果要想加载过的页面，不会因为离开页面之后页面数据就消失，就数据就必须在离开页面之后还存在，那么就可以使数据存在不同的组件；这里的不同组件是指被重复使用多次就等于new出多个不同的实例对象，因此，数据被存在不同的组件里，即使这个组件没在页面显示，但是数据仍然存在，再次打开那个页面时，就不必要重新加载；这就是首页不同频道切换的原理；
+  
+  + 使用到的组件：tab标签页，navbar，button，icon，下拉刷新，上拉加载；
+  
+  + 步骤：
+  
+    1. 使用tab标签页布局频道展示；
+  
+    2. 新建文章列表，使用自定义属性把频道信息传给对应的组件；
+  
+    3. 由于navbar默认不是固定定位，如果文章列表太长会滑动把navbar带走；底部的tabbar组件默认是固定定位，当文章列表组件使用list组件展示文章时，下面的加载更多样式会被tabbar覆盖住；有两种办法，1. 给navbar固定定位，且给最外层的盒子padding-top和padding-bottom；2. 单独给文章列表设置固定定位，里面的列表只会在里面滚动，不会带走navbar，且最大的好处是，滚动条只在文章列表区域显示，不然用第一种滚动条会在整个大盒子区域显示；由于固定定位盒子的宽高由内容决定，可以设置如下，滚动条也是如下设置，超出部分显示滚动条，不超出不显示；
+  
+       ![image-20211112165952697](img/image-20211112165952697.png)
+  
+    4. 上拉加载更多和下拉刷新看源代码解释；
+  
+    5. 可以使用vant内置样式设置超出部分省略号效果；
+  
+    6. 文章项单独制作一个组件，布局能用flex最好用flex，巧妙使用v-if去根据条件判断显示样式与隐藏；
+    
+    7. vant组件的图片组件的样式有时候宽高设置在行内，要修改为在style标签设置样式；因为postcss把px转为rem的插件不能转行内样式的px；
+
++ 频道编辑页面
+  + vant使用的组件：popup弹出层，cell单元格，grid宫格，button；
+  + 给首页频道列表加汉堡按钮：
+    + 当加了按钮，把频道往左拉到底，由于按钮是固定定位，会把频道名给遮住一部分；这时就要给频道列表的最后位置加一个占位方块，这个占位的宽度要跟按钮一样宽；使用tabs标签页的插槽；
+    + 当设置占位元素时，由于父元素设置display:flex，其他的子元素已经把父元素的空间占满了，而我们写的弹性子盒子默认fle-shrink是1，即超过父元素就缩小自己本身，那么这个元素就会缩小到没有宽度，所以要设置为flex-shrink为0；
+  + 点击汉堡按钮出现弹出层
+    + 直接点击修改弹出层状态即可；
+  + 频道项的宽度不要设置，设置一个最小宽度；
+  + 如果是基于原有数据衍生出来的新数据，记得多多使用计算属性；推荐频道项数据就是通过计算属性得来的；由于计算属性会因为依赖的数据源发生了变化而重新求值的特点，当在频道编辑时，对推荐频道进行点击，把数组的某一项给添加到用户的数组里，依赖的用户的频道数组的数据发生了变化，推荐频道就会自动减少；不用再次手动删除推荐频道的数组；但是页面刷新数据就会没了，还要做数据的持久化；
+  + ![image-20211114151704780](img/image-20211114151704780.png)
+  + 首页的频道列表加载模式；
+    + ![image-20211114174459196](img/image-20211114174459196.png)
+
++ **搜索页面**
+
+  + 主要使用到的组件：search搜索组件，list组件；
+
+  + 按钮组件有路由链接功能；
+
+  + 在单页面应用程序中，实现整体页面的切换，都是会用路由，不能使用a标签的url，因为只有一个页面；
+
+  + 如果要动态实现元素的显示与隐藏，就使用v-if配合布尔值；或者三元运算符；
+
+  + 如果实现某部分的页面的切换，即页面的小部分，可以使用动态组件component标签；也可以使用v-if；用v-if比较多；优先考虑v-if；
+
+  + 使用侦听器监听输入框的关键字，每变化一次就请求一次后台的数据，请求太频繁，要使用鲁大师的函数防抖；
+
+    + // 函数防抖的意思是：当被防抖函数包裹的内容和防抖函数，整体会返回一个函数，设置一个时间；每次调用一次被包裹的函数，
+
+        // 就会开始计时，规定时间到达后才会执行那个被调用的函数；如果在这个规定的时间内又调用了一次被包裹的函数，则重新计时，
+
+        // 那么第一次被调用的函数就不再被执行了，作废；从第二次被调用的函数开始计时，如果规定时间到了，就执行第二次函数的内容；
+
+        // 如果时间还是没到规定时间，又调用一次函数，那么又重新计时，前一次的函数调用就作废；以此类推；
+
+    + ```js
+      npm i lodash
+      ```
+
+    + ```js
+      默认全部导入,一般是使用按需导入；
+      import _ from 'lodash'
+      ```
+
+    + ```js
+      // 按需导入防抖函数
+      import {debounce} from 'lodash'
+      ```
+
+  + 搜索结果面板给固定住，以免滚动滚动条把顶部的搜索框给带走了；
+
+    + ![image-20211115003349621](img/image-20211115003349621.png)
+
+  + 搜索关键词高亮
+  
+    + 使用字符串替换的api，`str.replace()`和正则表达式的构造函数；
+  
+  + 每次数据持久化都最后再操作；搜索历史记录，未登录就把历史记录放在本地存储；如果登录了就放到线上；这个项目的历史记录不需要我们手动去存储到线上，后端会帮我们存；我们只需要调用历史记录接口即可，但是后端存储的历史记录如果比较少，可以跟后端说；未登录的历史记录就从本地获取；
+  
+  + 也可以登录和未登录的搜索历史都保存在本地；
+
++ **文章详情页**
+  + 用到了动态路由；路由传参；
+  + 下面的图片是，文章的样式，因为文章请求到的数据是html标签包裹着的文字的形式，但是我们要设置样式；通过下载样式文件的形式；这种方式是因为设计图不完整才这样子使用的；
+  + ![image-20211116012338307](img/image-20211116012338307.png)
+  + ![image-20211116012539809](img/image-20211116012539809.png)
+  + ![image-20211116012550967](img/image-20211116012550967.png)
+  + ![image-20211116012602941](img/image-20211116012602941.png)
+  + ![image-20211116012612619](img/image-20211116012612619.png)
+  + ![image-20211116012625480](img/image-20211116012625480.png)
+  + ![image-20211116012634921](img/image-20211116012634921.png)
+  + 图片的预览
+    + 图片预览组件比较特殊，要单独加载；如果是其他的组件直接以this得到即可或者以标签的形式使用，不必单独导入，因为已经全部导入了；
+    + 首先要拿到最外层的dom元素，通过xx.querySelectorAll('img')拿到所有的图片元素，并添加点击事件，使用vant组件的图片预览组件；涉及到$nextTick(cb)和ref；（由于后端接口有问题，图片显示不出来；因此在项目中源码无法操作；下面的图片是具体操作的过程）
+      + ![image-20211116213818415](img/image-20211116213818415.png)
+      + 由于我们请求到的文章内容是含有标签的字符串，因此要先拿到包裹文章字符串的最外层dom元素；使用ref引用；
+      + ![image-20211116214137359](img/image-20211116214137359.png)
+      + ![image-20211116214228212](img/image-20211116214228212.png)
+      + 在拿到最外层的dom元素之后，使用`querySelectoAll`拿到最外层元素里面的所有`img`标签；
+      + ![image-20211116214427055](img/image-20211116214427055.png)
+      + 对所有的img标签进行遍历，并添加点击事件，在点击事件里处理函数里，调用图片预览组件；
+      + ![image-20211116214748055](img/image-20211116214748055.png)
+  
++ **评论模块**
+
+  + 还是用到了list组件，
+  
+  + ![image-20211116235644636](img/image-20211116235644636.png)
+  
+  + 使用popup 组件时，发现每当重新开启弹出层，里面的数据都是一样的；
+  
+    + 原因：因为popup组件关闭时并不是把组件给销毁了，而是隐藏而已，所以组件再次出现时并没有被重新创建，所以当第一次发起数据请求之后，就没有再次发起，因此不论怎么样数据还是原来的数据；因此，需要当组件关闭时给它销毁，可以通过v-if来进行条件判断；
+  
+  + ==在父组件里间接修改子组件里的数组；==如下：
+  
+  + 下面是父组件
+  
+  + ```vue 
+    在父组件的data定义一个空数组，把这个空数组传递给子组件的自定义属性；那么两者的数组就会保持同步；如果在某些情况下要添加或者删除子组件里的数组元素，在父组件操作就是等于在操作子组件里的数组；
+    commList: []
+    
+    通过自定义属性传入
+    <Commends  :comm-list="commList"></Commends>
+    ```
+  
+  + 下面这个是子组件
+  
+  + ```vue
+    <template>
+      <van-list
+    
+      >
+        <CommendItem
+          v-for="(item, index) in commList"
+          :key="index"
+    
+        ></CommendItem>
+      </van-list>
+    </template>
+    
+    <script>
+    import { getCommends } from '@/api/commend.js'
+    
+    export default {
+      name: 'Commends',
+      props: {
+    //定义自定义属性 
+        commList: {
+          type: Array,
+          default: () => []
+        }
+     
+      },
+    
+      data() {
+        return {
+            //不要在这里定义空数组，是直接拿由父组件传递过来的空数组，这样子这里的数据就会和父组件里数据保持一样，因为都是引用类型；
+          // commList: [],
+    
+        }
+      },
+      methods: {
+     
+        async onLoad() {
+          const { data: res } = await getCommends()
+          
+          this.commList.push(...res.data.results)
+       
+      },
+    
+    }
+    </script>
+    
+    <style lang="less" scoped></style>
+    
+    ```
+  
++ **编辑个人资料页面**
+
+  + 用到了picker和datepicker组件；
+
+  + 更换头像（重点）
+
+    + 点击头像实际是点击文件选择表单；因为只有这个元素才有打开本地文件的能力；因此可以在紧邻被点击的元素旁放一个input，类型为file；
+
+      + ```vue
+        <input type="file" hidden ref="fileRef" accept="image/*" @change="onChange" />
+            <van-cell title="头像" is-link center @click="$refs.fileRef.click()">
+              <van-image :src="user.photo" fit="cover" round />
+            </van-cell>
+        
+        
+        
+        ```
+
+    +  hidden是把当前这个元素给隐藏了，就是添加了display:none;只是本身有这个属性，直接写即可； 当隐藏了之后，元素还是在的，只是看不到而已； 
+
+    +  由于要通过操作dom的方式对这个标签进行间接触发点击事件；给input添加ref引用；
+
+    + accept属性可以限制它选择的文件类型；
+
+    + change事件：由于当选择的文件没有变化时，这个事件不会触发；比如第一次选择这个文件，下次打开又是同一个文件，那么这个事件就不会被触发；为了避免这个现象，可以在这个在事件处理函数的最后添加这个代码：`e.target.value = ''`；
+
+    + 拿到的文件对象是`e.target.files[0]`这么表示；
+
+    + 如果要把拿到的文件对象是图片，要做预览或者展示；先把文件对象转成一个url，`const blob = window.URL.createObjectURL(e.target.files[0])`，然后就可以把这个地址给img标签用了；
+
+    + 当使用input的file类型拿到的文件，要上传到后端服务器，即调用接口，传递的请求参数，就要用下面的形式：
+
+      + ![image-20211120010339968](img/image-20211120010339968.png)
+
+  + 图片裁切
+
+    + 步骤：
+
+      1. 下载插件：`npm install cropperjs`；
+
+      2. 导入文件：
+
+         ```js
+         // 导入图片裁切的样式文件和库文件
+         import 'cropperjs/dist/cropper.css'
+         import Cropper from 'cropperjs'
+         ```
+
+      3. 把图片标签放到块级元素里，我们组建的根元素就是块级元素，所以不用处理；
+
+         ![image-20211120030642281](img/image-20211120030642281.png)
+
+      4. 给图片设置下面的样式
+
+         ![image-20211120030719638](img/image-20211120030719638.png)
+
+      5. 在data里定义一个空的变量，准备接受裁切实例对象；
+
+         ```vue
+           // 裁切图片的实例对象
+           cropper: null
+         ```
+
+      6. 给要被裁切的图片标签添加ref引用；
+
+         ```vue
+         <img :src="imgs"  ref="image" />
+         ```
+
+      7. 在mounted里放下面的代码
+
+         ```js
+             const image = this.$refs.image
+             const cropper = new Cropper(image, {
+               viewMode: 1,
+               dragMode: 'move',
+               aspectRatio: 1,
+               cropBoxMovable: false,
+               cropBoxResizable: false,
+               background: false,
+               movable: true
+             })
+             this.cropper = cropper
+         ```
+
+      8. 在methods里封装一个方法，返回一个promise对象
+
+         ```js
+             // 定义这个函数是为了方便拿到toBlob(数据)，括号里的数据；因为通过返回一个promise实例对象，以async和
+             // await配合，可以拿到resolve(数据)带出来的数据，不然代码还要写在回调函数里，不利于阅读；
+         
+             getCropperObj() {
+               return new Promise((resolve) => {
+                 this.cropper.getCroppedCanvas().toBlob((file) => {
+                   resolve(file)
+                 })
+               })
+             },
+         ```
+
+      9. ```js
+             async onConfirm() {
+               this.$toast.loading({
+                 message: '更改中...',
+                 forbidClick: true,
+                 duration: 0
+               })
+               // 得到裁切后的文件对象
+               const file = await this.getCropperObj()
+               // 把裁切后的文件对象转成可以被图片的src用blob数据；
+               const newBlob = window.URL.createObjectURL(file)
+               // 传文件到后端注意一下
+               const fd = new FormData()
+               // fd.append(参数名, 文件对象)
+               fd.append('photo', file)
+               await editPhoto(fd)
+               this.$toast.success('修改成功')
+               this.$emit('changePhoto', newBlob)
+               this.$emit('close')
+             }
+         ```
+         
+         > 注意：如果使用element做后台管理系统，看下下面的注意事项：
+         >
+         > ```js
+         >  // 这个是弹框打开之后的事件函数，只有弹框出现之后才能拿到图片的dom元素；
+         >     onOpened() {
+         >       // 替换掉请一次的图片，不然会展示前一次的；
+         >       if (this.cropper) {
+         >         this.cropper.replace(this.blobdata)
+         >         // 裁切器只能创建一次，所以代码要停止，不然会有多个裁切器存在；
+         >         return
+         >       }
+         >       const image = this.$refs.imageRef
+         >       const cropper = new Cropper(image, {
+         >         aspectRatio: 1,
+         >         viewMode: 1,
+         >         dragMode: 'move',
+         >         cropBoxMovable: false,
+         >         cropBoxResizable: false,
+         >         background: false,
+         >         movable: true
+         >       })
+         >       this.cropper = cropper
+         >     },
+         > ```
+         
+         
+
++ **小智同学**
+
+  + WebSocket
+
+    + WebSocket 是一种数据通信协议，也是用于客户端和服务端数据通信，类似于我们常见的 http
+
+    - 既然有 http，为啥还要 WebSocket
+
+    - http 通信是单向的 
+
+    - - 请求 + 响应
+
+    - - 没有请求也就没有响应
+
+    初次接触 WebSocket 的人，都会问同样的问题：我们已经有了 HTTP 协议，为什么还需要另一个协议？它能带来什么好处？
+
+    
+
+    答案很简单，因为 HTTP 协议有一个缺陷：通信只能由客户端发起。
+
+    
+
+    举例来说，我们想了解今天的天气，只能是客户端向服务器发出请求，服务器返回查询结果。HTTP 协议做不到服务器主动向客户端推送信息。
+
+    
+
+    这种单向请求的特点，注定了如果服务器有连续的状态变化，客户端要获知就非常麻烦。我们只能使用["轮询"](https://www.pubnub.com/blog/2014-12-01-http-long-polling/)：每隔一段时候，就发出一个询问，了解服务器有没有新的信息。最典型的场景就是聊天室。
+
+    
+
+    轮询的效率低，非常浪费资源（因为必须不停连接，或者 HTTP 连接始终打开）。因此，工程师们一直在思考，有没有更好的方法。WebSocket 就是这样发明的。
+
+    
+
+    WebSocket 协议在 2008 年诞生，2011 年成为国际标准。所有浏览器都已经支持了。
+
+    
+
+    它的最大特点就是，**服务器可以主动向客户端推送信息**，**客户端也可以主动向服务器发送信息**，是真正的**双向平等对话**，属于[服务器推送技术](https://en.wikipedia.org/wiki/Push_technology)的一种。
+
+    简单理解：
+
+    
+
+    HTTP 打电话：
+
+    
+
+    - 我问一句
+
+    - 你回答一句
+
+    - 没有提问就没有回答，即便对方主动给你说话，我也是个聋子听不见
+
+    
+
+    WebSocket 打电话：
+
+    
+
+    - 双向对话
+
+    
+
+    
+
+    其他特点包括：
+
+    
+
+    （1）和 HTTP 一样属于应用层协议，也是建立在 TCP 协议之上，服务器端的实现比较容易。
+
+    
+
+    （2）与 HTTP 协议有着良好的兼容性。默认端口也是 80 和 443，并且握手阶段（第 1 次建立连接）采用 HTTP 协议，因此握手时不容易屏蔽，能通过各种 HTTP 代理服务器。
+
+    
+
+    （3）数据格式比较轻量，性能开销小，通信高效。
+
+    
+
+    （4）可以发送文本，也可以发送二进制数据。
+
+    
+
+    （5）没有同源跨域限制，客户端可以与任意服务器通信。
+
+    
+
+    WebSocket 不是用来代替 HTTP 的，它是用来解决实时通信的业务场景。如果业务不需要实时性，那就没必要使用 WebSocket。
+
+    
+
+    WebSocket 也是有资源消耗的，因为它要实时通信，也是需要和服务端保持一定的通信连接。
+
+    
+
+    WebSocket 也是需要服务端配合才能使用。
+
+    
+
+    （6）协议标识符是`ws`（如果加密，则为`wss`），服务器网址就是 URL。
+
+    
+
+    （7）浏览器专门为 WebSocket 通信提供了一个请求对象 `WebSocket`
+
+    
+
+    - XmlHttPRequest 请求对象，发起 HTTP 协议请求
+
+      - ```js
+        ws://example.com:80/some/path
+        
+        http https
+        ws   wss
+        ```
+
+    
+
+  + 原生的WebSocket对象
+
+    + 浏览器为 HTTP 通信提供了 `XMLHttpRequest` 对象，同样的，也为 WebSocket 通信提供了一个通信操作接口：`WebSocket`。
+
+    + ```js
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+          <title>Document</title>
+        </head>
+        <body>
+          <script>
+            // WebSocet 通信模型
+      
+            // 1. 拨打电话（建立连接）
+            // 注意：wss://echo.websocket.org 是一个在线的测试接口，仅用于 WebSocket 协议通信测试使用
+            var ws = new WebSocket("wss://echo.websocket.org");
+      
+            // 当连接建立成功，触发 open 事件
+            ws.onopen = function(evt) {
+              console.log("建立连接成功 ...");
+      
+              // 连接建立成功以后，就可以使用这个连接对象通信了
+              // send 方法发送数据
+              ws.send("Hello WebSockets!");
+            };
+      
+            // 当接收到对方发送的消息的时候，触发 message 事件
+            // 我们可以通过回调函数的 evt.data 获取对方发送的数据内容
+            ws.onmessage = function(evt) {
+              console.log("接收到消息: " + evt.data);
+      
+              // 当不需要通信的时候，可以手动的关闭连接
+              // ws.close();
+            };
+      
+            // 当连接断开的时候触发 close 事件
+            ws.onclose = function(evt) {
+              console.log("连接已关闭.");
+            };
+          </script>
+        </body>
+      </html>
+      ```
+
+    + ![image-20211120143442523](img/image-20211120143442523.png)
+
+  + 小智同学的制作
+
+    + 场景：这是一个可以实时通信的聊天界面，不能使用http协议；要使用websocket；实际开发中不会使用原生的对象，就跟我们不会使用原生的XMLHttpRequest对象做http请求一样，使用axios；在实际开发中，websocket请求使用`socket.io-client`；
+
+    + 步骤：
+
+      1. 安装`npm i socket.io-client`；
+
+      2. 导入`import io from 'socket.io-client'`；
+
+      3. 在data里放一个变量接受实例对象；
+
+         ```vue
+           data() {
+             return {
+               
+               // 实时连接对象
+               socket: null,
+            
+             }
+           },
+         ```
+
+      4. 在created里
+
+         ```vue
+           created() {
+             // 建立连接
+             const socket = io('http://toutiao.itheima.net', {
+               query: {
+                 token: this.userToken
+               },
+               transports: ['websocket']
+             })
+             // 把连接成功的对象赋值给data里的数据，因为要在methods里使用；
+             this.socket = socket
+             // 连接成功触发connect事件
+             socket.on('connect', () => {
+               console.log('连接成功')
+             })
+             // 断开连接触发disconnect事件
+             socket.on('disconnect', () => {
+               console.log('断开连接')
+             })
+             // 监听message事件，接受服务器发过来的消息；接受消息的事件也是后端规定的；
+             socket.on('message', (data) => {
+               // 把发送的消息存到data里，为了遍历渲染
+               this.allNews.push(data)
+             })
+           },
+         ```
+
+      5. ```vue
+         methods: {
+             // 点击按钮触发函数，发送消息给服务端
+             onSendNews() {
+               const data = {
+                 // 发送的消息
+                 msg: this.sms,
+                 // 当前的时间戳
+                 timestamp: Date.now()
+               }
+               // 向服务器发送消息;注意发送消息的事件是后端规定的；
+               this.socket.emit('message', data)
+               // 把发送的消息存到data里，为了遍历渲染
+               this.allNews.push(data)
+             }
+           }
+         ```
+
+      > 聊天时，要实时把滚动条拉到最后；具体看源码；
+
+  + **组件缓存**
+
+    + 场景：当点击底部的tabbar的首页和我的，我们需要让组件加载一次之后，之后再次进去那个页面，为了显示的比较快，需要给组件缓存；即当组件切换时不是被销毁，而是被缓存；组件缓存只适合于动态组件，即使用component标签时可以使用组件缓存，路由切换也是动态组件，也可以组件缓存，实际开发中一般只有路由缓存；该项目中，还有当在首页的新闻列表处点击某篇文章进去，出来原来的位置也要做组件缓存；此时应该缓存entry组件，首页组件显示的内容是在entry组件；tab标签页切换会自动缓存，不用管；
+
+    + 缓存路由的组件时，要在路由出口，即路由占位符的地方被包裹`keep-alive`；
+
+      + 组件缓存带来的问题：
+
+        + 我们用keep-alive包裹一级路由出口，即根组件的路由占位符；可以把通过这个路由出口显示的组件都给缓存起来，通过路由规则可以知道哪些是通过一级路由出口显示的组件；由于文章详情组件也是一级路由出口显示的组件，又因为文章详情的显示是多个hash值对应一个组件的形式，如果当前这个组件被缓存了，下次再进去这个组件就不会创建，不会执行created钩子函数，就不会根据路由传参的方式拿到的参数去请求数据渲染页面，那么每个文章详情的页面都是相同的；
+
+          + 解决：用条件渲染的方式，给keep-alive指定include属性，指定只需要缓存entry组件，不缓存文章详情组件；
+
+            ```vue
+               <keep-alive :include="['Entry']">
+                  <router-view></router-view>
+                </keep-alive>
+            ```
+
+            
+
+        + 由于上面我们指定缓存了entry组件，entry组件里有子路由出口，当我们切换到我的页面，或者首页，由于我们缓存了entry组件，那么在entry组件里显示的子路由组件的数据也会被缓存；当我们退出登录，重新登录会发现，登录页面的数据和首页的数据就没有变，因为虽然他们是子路由组件，我们也没有指定缓存他们，但是我们缓存了它们的父路由组件，切换子路由组件时，父路由组件还是会看得到它的页面，因此子路由组件的数据也会跟着缓存；
+
+          + 解决：由此可见，上面的include里的数据不能写死，要动态的；在vuex容器定义一个专门存放需要被缓存的数组；把这个数组绑定给一级路由的出口的keep-alive的include属性；当把这个数组里的组件名删除就是把缓存删除；把组件名添加就是添加缓存；因为要在不同的组件操作同一数组。所以要在vuex容器定义；在即将登录成功之后把缓存删除，在entry的mounted里把缓存添加上；
+
+    + 缓存之后，从文章列表点进去，出来之后要把滚动条保持在进去之前的位置；
+
+      + 在文章列表的组件里的mounted里监听滚动条事件并记录到data里；由于每次滚动条变化就会触发事件，触发频率太高，可以使用防抖函数，但是不要时间设置太长，否则会导致记录不到；当组件被激活时，就使用`activated`钩子函数去处理设置原来的滚动条位置；
+
+        ```vue
+         // 组件缓存好了之后，监听滚动条事件
+          mounted() {
+            const list = this.$refs.articleListRef
+            // 会频繁触发就使用防抖函数
+            list.onscroll = debounce(() => {
+              this.scrollTop = list.scrollTop
+              // console.log(list.scrollTop)
+            }, 50)
+          },
+          // 组件被激活时执行
+          activated() {
+            const list = this.$refs.articleListRef
+            list.scrollTop = this.scrollTop
+          },
+        ```
+
+        
+
+    + > ==注意：只要是把某个组件给缓存之后，这个组件里的所有组件的数据都会被缓存；==
+
+  + **token过期**
+    
+    + 场景：由于token的有效期仅为两个小时，过期了之后就会返回401；要么用户重新登录获取新的token，要么就在响应拦截器里统一处理；
+    
+      > 注意：
+      >
+      > 1. 以路由的形式切换的组件，由于路由模块已经在全局main.js里导入并注册，因此可以在组件里使用`this.$router`得到路由导航对象；同样，vuex容器，也在去全局导入和注册，可以在组件里`this.$store`得到容器；
+      > 2. 在其他的js模块里，如果要使用路由的导航对象和vuex容器，就必须分别导入路由模块和vuex模块：`import router`
+    
+      + 处理401的步骤：
+        1. 判断vuex容器中是否有token，如果没有就跳转到登录页面去重新登录；
+        2. 如果有token，那么还请求返回401就是token过期了；
+        3. 先使用axios新建一个区别于request的请求实例，不要使用原来的request请求实例，如果使用原来的request请求实例发起请求新的token，加入这个请求还是返回401，那么同样会走响应拦截器的去处理401，然后再次请求再次401，陷入了死循环；所以要使用axios去新create一个新的请求实例，单独使用`try{}catch(e){}`去执行此次请求失败的行为；每次请求都会有成功和失败，失败的情况可以全部统一到响应拦截器里去处理；如果要单独对某个请求去处理失败的情况，可以使用`try{}catch(e){}`；如果使用refresh_token这个参数去请求新的token失败，那么只能跳转到登录页面去重新登录了；如果新的token请求成功，那么就要把新拿到token放到vuex容器里，并存到本地；然后把刚才请求失败再重新返回出去，去重新请求，由于token已经更新，请求就会成功了，`return request(error.config)`；
+    
+      > 返回401不只是token过期，也可能是没有token，即没有登录；
+    
+    + 注：如果要配置拦截器可以直接去github官网搜索axios，去找文档复制即可；
+    
+    + 使用响应拦截器统一处理请求失败的情况；
+    
+      + ```js
+        // 单独新建一个axios实例，去请求新的token；如果还是使用request去请求，如果请求返回401就会再次执行响应拦截器里
+        // 的代码，然后请求又是401，如此循环就会出现死循环；
+        const getNewTokenReq = axios.create({
+          baseURL: 'http://toutiao.itheima.net'
+        })
+        
+        // 响应拦截器
+        request.interceptors.response.use(
+          function (response) {
+            // 响应成功之后进入这里
+        
+            return response
+          },
+          async function (error) {
+            // 响应失败之后进入这里
+            // console.dir(error)
+            const status = error.response.status
+            if (status === 401) {
+              // token无效
+              // 如果没有token就去重新登录
+              const { userToken } = store.state
+              if (!userToken || !userToken.token) {
+                toLoginPage()
+                return
+              }
+              try {
+                const { data: res } = await getNewTokenReq({
+                  method: 'PUT',
+                  url: '/v1_0/authorizations',
+                  // 请求头参数必须有refresh_token
+                  headers: {
+                    Authorization: `Bearer ${userToken.refresh_token}`
+                  }
+                })
+                // 得到新的token之后要传给vuex容器
+                userToken.token = res.data.token
+                // 这里不能使用this.$store，因为不是在组件里；也不能使用mapMutaions；
+                store.commit('setState', userToken)
+                // 重新发起刚才请求失败的操作；注意是request发起请求；
+                return request(error.config)
+              } catch (e) {
+                toLoginPage()
+              }
+            } else if (status === 4000) {
+              Toast.fail('客户端请求参数异常')
+            } else if (status === 403) {
+              Toast.fail('没有权限操作')
+            } else if (status >= 500) {
+              Toast.fail('服务端异常')
+            } else {
+              Toast.fail('未知错误')
+            }
+        
+            return Promise.reject(error)
+          }
+        )
+        
+        // 封装一个跳转登录页面得函数
+        function toLoginPage() {
+          // 使用push也可以，就是会有历史记录，但是在这里没必要有历史记录；
+          router.replace('/login')
+        }
+        ```
+    
+  + 登录页面优化
+  
+    + 场景：当点击登录时，我们原本的代码是写，`this.$router.back()`，从哪个页面过来就返回哪个页面；但是，如果我们从其他的网站的网页去到那个登录页面，点击登录就会跳转到其他的网站的网页；因此，肯定不能用`this.$router.back()`；但是我们又要在我们自己网站的某个网页去到登录页，登录成功回到我们网站的网页；如果在别的网站的网页去到登录页，登录成功就去我们网站的首页；
+  
+    + 解决：在从其他页面去到登录页面时，路由传参以query的形式，把当前的hash值给传到登录页，登录页拿到之后就可以通过`this.$route.query.xxx`拿到前一个页面的hash值，然后通过`this.$router.push('拿到的前一个页面的hash值')`,如果前一个页面没有传它的hash值过来，说明不是本网站的页面，就跳转到首页；
+  
+      ```vue
+       <div class="not-login" v-else>
+            <!-- 从我的页面去到登录页，由于登录页的代码不是设置this.$router.back()；因此为了能回到
+            我的页面，就要通过路由传参的方式，把当前的页面的hash值给传到登录页面的hash值；以query查询参数的方式；
+            -->
+            <img
+              src="./shouji.png"
+              alt=""
+              @click="
+                $router.push({
+                  name: 'login',
+                  query: {
+                    ReturnUrl: '/entry/mine'
+                  }
+                })
+              "
+            />
+            <p>登录/注册</p>
+          </div>
+      ```
+  
+      在request.js处理401情况时，有跳转到登录页面的情况，所以就有下面的代码，主要是要知道从非组件怎么获取本组件的hash值；
+  
+      ```js
+      // 封装一个跳转登录页面得函数
+      function toLoginPage() {
+        // 使用push也可以，就是会有历史记录，但是在这里没必要有历史记录；
+        // 从当前页面到登录页面都要记录，当前页面的hash值；由于这个代码是在request.js里写的，并不是组件，
+        // 且我们不知道会在哪一个页面执行这个响应拦截器的代码，不知具体要传什么hash值；
+        // 因此可以用router.currentRoute.fullPath得到当前页面的hash值；（前提得导入路由模块才可以使用router）
+        // router.currentRoute就是在组件里的this.$route；
+      
+        router.replace(`/login?ReturnUrl=${router.currentRoute.fullPath}`)
+      }
+      ```
+  
+      
+  
+      ```js
+        // 登录成功之后返回原来的页面；如果没有前一页的hash值，就跳转到首页；
+              this.$router.push(this.$route.query.ReturnUrl || '/')
+      ```
+  
+      > 只要是到登录页面，都要传递一个本页面的hash值到登录页面，以路由传参的query的方式；即查询参数；
+      >
+      > 如果是传递的是请求的参数就用params的方式，即路径参数；
+      >
+      > 为了写代码能更顺畅就按照上面的选择来，没有为甚么，其实都可以，但是会选择比较麻烦，所以就定死；
+  
+  + **导航守卫优化**
+  
+    + 如果要让某个页面跳转需要权限，比如小智同学需要登录才可以进入；那么可以直接在路由规则里加一个meta属性，属性值为对象；这个对象里的属性名和值可以自由定义；相当于一个标记；加了meta之后，to和from的路由信息对象就包含了meta的属性；
+  
+      ```js
+        {
+          path: '/chat',
+          name: 'Chat',
+          component: () => import('@/views/Chat/Chat.vue'),
+          // 这个meta属性的对象里的属性名和属性值可以随便写，相当于这个路由规则的标记；
+          meta: {
+            requireLogin: true
+          }
+        }
+      ```
+  
+      ```js
+      router.beforeEach((to, from, next) => {
+        if (!store.state.userToken) {
+          if (to.meta.requireLogin) {
+            Dialog.confirm({
+              title: '登录确认',
+              message: '该页面需要登录，是否登录？'
+            })
+              .then(() => {
+                // on confirm
+                router.push('/login?ReturnUrl=/chat')
+              })
+              .catch(() => {
+                // on cancel
+                next(false)
+              })
+          } else {
+            next()
+          }
+        } else {
+          next()
+        }
+      })
+      ```
+  
+  + 打包移动端app
+  
+    + ![image-20211122020453093](img/image-20211122020453093.png)
+    + ![image-20211122020516295](img/image-20211122020516295.png)
+    + ![image-20211122020525749](img/image-20211122020525749.png)
+    + ![image-20211122020535151](img/image-20211122020535151.png)
+    + ![image-20211122020543273](img/image-20211122020543273.png)
+    + ![image-20211122020551614](img/image-20211122020551614.png)
+    + ![image-20211122020601583](img/image-20211122020601583.png)
+    + ![image-20211122020614551](img/image-20211122020614551.png)
+    + ![image-20211122020628363](img/image-20211122020628363.png)
+    + ![image-20211122020638572](img/image-20211122020638572.png)
+    + ![image-20211122020651569](img/image-20211122020651569.png)
+    + ![image-20211122020659468](img/image-20211122020659468.png)
+    + ![image-20211122020712472](img/image-20211122020712472.png)
+    + ![image-20211122020720479](img/image-20211122020720479.png)
+    + ![image-20211122020728618](img/image-20211122020728618.png)
+    + ![image-20211122020737878](img/image-20211122020737878.png)
+    + ![image-20211122020745755](img/image-20211122020745755.png)
+    + ![image-20211122020754915](img/image-20211122020754915.png)
+    + ![image-20211122020807457](img/image-20211122020807457.png)
+    + ![image-20211122020819897](img/image-20211122020819897.png)
+    + ![image-20211122020830662](img/image-20211122020830662.png)
+    + ![image-20211122020841991](img/image-20211122020841991.png)
+    + ![image-20211122020852854](img/image-20211122020852854.png)
+    + ![image-20211122020901600](img/image-20211122020901600.png)
+    + ![image-20211122020913782](img/image-20211122020913782.png)
+    + ![image-20211122020925465](img/image-20211122020925465.png)
+    + ![image-20211122020935317](img/image-20211122020935317.png)
+    + ![image-20211122020944757](img/image-20211122020944757.png)
+    + ![image-20211122020957313](img/image-20211122020957313.png)
+    + ![image-20211122021015571](img/image-20211122021015571.png)
+    + ![image-20211122021036026](img/image-20211122021036026.png)
+  
+
+#### 头条号发布作品后台管理系统
+
++ 对于提交到后端的操作，比如登录，发布文章等，都是先做数据请求，即先做可以发送的效果，最后再去做表单验证，loadding等优化； 
+
++ ![image-20211129001040171](img/image-20211129001040171.png)
+
++ 在标签上或者组件上监听绑定默认事件时，如果处理函数有形参，而在实际调用时不传参数，会默认传入事件参数或者事件对象$event，有时候方法出现错误要排查这个原因；
+
++ 做pc端项目，布局都用flex布局，百分比布局，宽度都是设置百分比或者flex等于多少；高度啊，字体啊，细微的调节间距等就直接用px即可；因为pc端的电脑屏幕分两种，有大屏幕和小屏幕的，水平方方向上就做个适配，垂直方向就不必了；毕竟两种电脑屏幕大小差距也不是很大；
+
++ 使用element的表格组件，只要是关于表单验证的，都统一模仿它在data里的数据的格式，就都是用一个对象包裹着数据；
+
++ ![image-20211127225251540](img/image-20211127225251540.png)
+
++ ![image-20211127212732497](img/image-20211127212732497.png)
+
++ **项目初始化**
+  
+  + 在码云中生成添加公钥（第一次注册需要添加即可）
+    + ![image-20211122190535674](img/image-20211122190535674.png)
+    + ![image-20211122190553965](img/image-20211122190553965.png)
+    + ![image-20211122190620365](img/image-20211122190620365.png)
+    + ![image-20211122190711223](img/image-20211122190711223.png)
+    + ![image-20211122191557865](img/image-20211122191557865.png)
+    + ![image-20211122191808664](img/image-20211122191808664.png)
+    + ![image-20211122191910001](img/image-20211122191910001.png)
+    + ![image-20211122192615736](img/image-20211122192615736.png)
+    
+  + 由于通过vue-cli创建的项目已经帮我们新建了本地的仓库，我们不用再次git init；只要把本地仓库的所有文件都添加到暂存区，然后连接远程仓库，推上去即可；每做好一个功能都推送一下；
+  
+  + **登录页**
+    + 表单验证时，必须最外层有el-form包裹；每个表单项有el-form-item包裹；
+    + 可以使用validator，去自定义检验规则；
+    + 表单组件的表单项，如果添加了验证规则，如果对表单项进行操作，就会自动验证；如果不对表单项操作，默认是不会验证的，要手动调用validate方法进行验证；
+    + 问题1：尽管使用element组件的表单验证的功能时，当输入内容会自动验证；但是如果输入内容不符合格式，点击登录也会发起请求，造成没必要的请求，怎么解决？
+    + 解决1：可以手动对表单进行验证，通过ref引用拿到el-form的组件实例，调用validate方法；由于这个方法的参数为回调函数，在表单检验通过后就会调用这个回调函数，因此是异步的，所以就要把发起请求的操作都放到这个回调函数里；可以在回调函数里谈判是否检验通过，如果校验通过就发起请求；如果检验不通过就停止执行里面的代码；
+    + 对解决1的代码优化：如果validate不存入回调函数就会返回promise实例对象；因此可以用async await的方法把异步变同步，且如果校验成功就会执行下面的代码，如果失败就停止执行下面的代码，但是失败了没处理会在终端报错，因此可以用try{}catch(e){}去处理；不论是promise还是async await，都是错误了，如果没处理就会停止代码的执行；
+    
+  + **素材管理**
+  
+    + `element-ui`的`radio单选框组件`没有点击事件，如果手动添加`.native`的事件修饰符，虽然有这个事件了，但是当点击一次会触发两次事件，因此，如果发起请求的话就会发起两次请求，造成没必要的服务器压力；根据绑定的值的变化来发起请求，绑定change事件；因此，使用如下的方式优化：
+  
+      ```vue
+      <el-radio-group v-model="isCollect" size="mini" @change="onRadioChange">
+                <el-radio-button :label="false">全部</el-radio-button>
+                <el-radio-button :label="true">收藏</el-radio-button>
+       </el-radio-group>
+      ```
+  
+      ```js
+      onRadioChange(val) {
+            if (val) {
+              this.currentPage = 1
+              this.loadImages()
+            } else {
+              this.currentPage = 1
+              this.loadImages()
+            }
+          }
+      ```
+  
+    + 使用`dialog`组件，如果出现弹框被遮罩盖住了，要设置是这个属性；
+  
+      ![image-20211130010737475](img/image-20211130010737475.png)
+  
+    + 使用`upload`组件做文件上传；
+  
+      + ![image-20211130010829654](img/image-20211130010829654.png)
+  
+      + ![image-20211130010854549](img/image-20211130010854549.png)
+  
+        ```js
+        //配置请求头，content-type不用配置
+        data() {
+            const user = JSON.parse(localStorage.getItem('user'))
+            return {
+        //请求头是对象，把这个对像绑定给headers属性；    
+              token: {
+                Authorization: `Bearer ${user.token}`
+              }
+            }
+          }
+        ```
+  
+      + 还要指定`name`属性，属性值为要上传的文件的属性名；
+  
+        ![image-20211130011210947](img/image-20211130011210947-16382059324901.png)
+  
+        ![image-20211130011230404](img/image-20211130011230404.png)
+  
+      + 通过这个属性，注意这个是属性，写函数把弹框给关了；
+  
+        ![image-20211130011329067](img/image-20211130011329067.png)
+  
+        ![image-20211130011347948](img/image-20211130011347948.png)
+  
+        
+  
+      + 如果要给数组的每个对象元素单独添加属性和值，可以以下面的方式
+  
+        ![image-20211130011513707](img/image-20211130011513707.png)
+  
+    + 使用分页需要注意的几个属性，事件等：
+  
+      ![image-20211130011748713](img/image-20211130011748713.png)
+  
+      ![image-20211130011815362](img/image-20211130011815362.png)
+  
+    + 
+  
+    
+  
+    
+  
+    
+  
+  + 项目的亮点
+    + 使用富文本编辑器上传图片时，是base64格式，转化为在线地址，不认如果文件太多会加载缓慢；如果单纯是把本地资源上传到服务器就不会有这个问题；使用富文本编辑器是因为，我们先插入到富文本，会被解析成base64；如果是一步到位上传到服务器就不会有这个问题；
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4808,7 +6216,28 @@ export default {
     console.log(a)  //去除首位空格
   ```
 
-  
++ `replace()`：替换某些字符为另外的字符；
+
+  ```js
+    let str = 'hello world'
+    let newstr = str.replace('hello', 'nihao')
+    // 会返回一个新字符串，原来的字符串不会修改；
+    console.log(newstr)  //nihao world
+  ```
+
+### 正则表达式的构造函数
+
+```js
+  let str = 'hello world hello HEllo'
+  //   /hello/gi这是正则表达式的字面量写法；也可以这么写，两者等价；new RegExp('hello', 'gi')
+  // g是全部匹配，i是忽略大小；
+  let newstr = str.replace(/hello/gi, '你好')
+  console.log(newstr)  //你好 world 你好 你好
+```
+
+
+
+
 
 ### 数字显示小数的api
 
@@ -4821,6 +6250,10 @@ export default {
 ### Promise
 
 + `Promise`是一个构造函数；
+
++ Promise是解决回调地狱的问题，但是我们为什么要写回调地狱的代码？因为比如异步任务的代码里的回调函数会被最后执行，因此我们如果需要把写的代码执行顺序在异步的回调函数之后就要把这个代码放在回调函数之内，如果回调函数太多，就会层层嵌套形成回调地狱；因此，使用promise和async await就是把异步代码按顺序执行会写成回调地狱变成同步的写法；
+
++ 所以，使用async await和axios请求的写法，就是把请求的异步执行顺序，变成同步的执行顺序；就是说请求执行完了，才可以走下面的代码；
 
 + `promise`是解决回调函数嵌套回调函数形成的回调地狱，不会减少代码量；
 
@@ -4926,6 +6359,8 @@ export default {
     // 每次成功的回调函数都要return出一个新的Promise对象，这样每次then方法只执行前一个成功的回调函数，
     //失败在后面统一处理；如果每次return的promise对象都相同可以定义一个函数；
   ```
+  
++ ![image-20211110173842821](img/image-20211110173842821.png)
 
 
 ### async   await
@@ -4987,6 +6422,8 @@ export default {
   
       })()
   ```
+  
++ 如果使用async  await，错误的捕捉就用try{}catch(e) {}；如果出错，错误没被捕捉就会终端报错，后面的代码也不会执行了；
 
 ### 解构赋值
 
@@ -5246,7 +6683,7 @@ export default {
 
 ### 数组中的方法
 
-> 使用下面数组方法的一个技巧：如果需要对数组的每一项进行判断，那么就直接在函数体里 return 出一个对所有元素进行判断的条件即可；如果找到某一个元素就可以了，那么就在函数体里，写条件再return true，停止循环；
+> 使用下面数组方法的一个技巧：如果需要对数组的每一项进行判断，那么就直接在函数体里 return 出一个对所有元素进行判断的条件即可，或者那么就在函数体里，写条件再return true，停止循环；
 
 + `forEach()`：
 
@@ -5375,7 +6812,7 @@ export default {
 
   + 找到符合条件就停止；
 
-  + 用途：用来找符合条件的某一个元素；
+  + 用途：用来找符合条件的第一个元素；
 
   + ```js
       let arr = [10, 20, 26, 40]
@@ -5397,7 +6834,7 @@ export default {
 
   + 找到符合条件就停止；
 
-  + 用途：用来找符合条件的某一个索引；
+  + 用途：用来找符合条件的第一个索引；
 
   + ```js
       let arr = [10, 20, 26, 40]
@@ -5443,6 +6880,8 @@ export default {
     //  true,字符串包含v
      console.log(str.includes('v'))
     ```
+
++ 截取数组：`slice(开始索引，结束索引)`，包前不包后；
 
 + `map()`：
 
@@ -5515,6 +6954,35 @@ export default {
     
   console.log(result)
   ```
+  
+  > 注意：
+  >
+  > + ==上面的所有的数组的方法都适合这个规则，比如find方法，return 条件，只要条件是true，就会停止循环，并把当前这次循环的数组元素返回出来；==
+  >
+  > ```js
+  >   let arr = [1,2,3,4,5,6,7]
+  >   const new1 = arr.filter(value => {
+  >     // 每次循环，只要是return的是true，就表示本次循环的元素要被推进新数组
+  >     // 因此，可以return 一个条件   只要这个条件最后的结果是true，就代表这次的元素要被放进新数组；
+  >     return true
+  >   })
+  >   console.log(new1)  //[1, 2, 3, 4, 5, 6, 7]
+  > ```
+  >
+  > 一个数组去除另外一个数组的元素
+  >
+  > ```js
+  >   let arr = [1,2,3,4,5,6,7]
+  >   let arr2 = [2,3,4]
+  >   const new1 = arr.filter(value => {
+  >     return !arr2.find(item => {
+  >       return value === item
+  >     })
+  >   })
+  >   console.log(new1)  //[1, 5, 6, 7]
+  > ```
+  >
+  > 
 
 ### 数组拼接
 
@@ -5533,9 +7001,92 @@ export default {
     const newarr = [...arr1, ...arr2]
   
     console.log(newarr)  //[1, 2, 3, 4, 'a', 'b', 'c']
+  
+    arr1.push(...arr2)  //这样子也可以
   ```
 
-  
+
+### 数组的去重
+
++ ```js
+  //这个方法是es6原生的方法  
+  let arr1 = [1,2,3,4,5]
+    let arr2 = [1,2,3]
+    // 这是数组的合并
+    let arr3 = [...arr1,...arr2]
+    console.log(arr3)  //[1, 2, 3, 4, 5, 1, 2, 3]
+    // 数组的去重
+    let arr4 = [...new Set(arr3)]
+    console.log(arr4)   // [1, 2, 3, 4, 5]
+  ```
+
++ 也可以用lodash的方法
+
+  + ![image-20211115203205495](img/image-20211115203205495.png)
+
+### 数组的排序
+
++ sort()方法是数组自带的一种排序方法，默认情况下会将元素按照字符串进行比较。
+
++ **当元素为字符串时**
+
+  + 将元素从字符串从第一位开始比较，第一位相同时比较后一位。
+
+  + ```js
+    var arr = ["cb","a","g","cy"];
+    arr.sort();
+    console.log(arr); //["a","cb","cy","g"]
+    
+    ```
+
++ **当元素为数字时**
+
+  + 默认将数字元素当做字符串来进行比较。先比较第一位，第一位相同时在比较后一位；
+
+  + ```js
+    var arr2 = [20,13,11,8,0,11];
+    arr2.sort();
+    console.log(arr2); //[0,11,11,13,20,8]
+    
+    ```
+
++ **控制sort()方法的排序方式**
+
+  + ```js
+    var arr2 = [20,13,11,8,0,11];
+    
+    //按升序排列
+    
+    arr2.sort(function(a,b){
+    	//a,b表示相邻的两个元素
+    	//若返回值>0,数组元素将按升序排列
+    	//若返回值<0,数组元素将按降序排列
+    	return a-b; 
+    });
+    console.log(arr2); //[0,8,11,11,13,20]; 新数组按升序排列
+    
+    
+    //按降序排列
+    
+    arr2.sort(function(a,b){
+    	//a,b表示相邻的两个元素
+    	//若返回值>0,数组元素将按升序排列
+    	//若返回值<0,数组元素将按降序排列
+    	return b-a; 
+    });
+    console.log(arr2); //[20,13,11,11,8,0]; 新数组按降序排列
+    
+    
+    //随机排序
+    
+    arr2.sort(function(a,b){
+    	return Math.random()-0.5;  //返回值的正负概率分别为50%，故升降序排列是随机的
+    });
+    console.log(arr2); //新数组随机排序
+    
+    ```
+
+  > 控制sort()的排序方式，只要记住return a-b 就是升序排列;return b-a 就是降序排列；但是在写形参时，a要在b前面；
 
 ### 本地存储
 
@@ -5636,6 +7187,558 @@ export default {
 3. 直接导入并执行模块中的代码
 
    ![image-20211106171337363](img/image-20211106171337363.png)
+
+### 解决后端返回数据中大数字的问题
+
++ 后端返回的数据一般都是 **JSON 格式的字符串**。
+
+  + ```js
+    '{ "id": 9007199254740995, "name": "Jack", "age": 18 }'
+    ```
+
++ 如果这个字符不做任何处理，你能方便的获取到字符串中的指定数据吗？非常麻烦。所以我们要把它转换为 JavaScript 对象来使用就很方便了。幸运的是 axios 为了方便我们使用数据，它会在内部使用 `JSON.parse()` 把后端返回的数据转为 JavaScript 对象。
+
+  + ```js
+    // { id: 9007199254740996, name: 'Jack', age: 18 }
+    JSON.parse('{ "id": 9007199254740995, "name": "Jack", "age": 18 }')
+    ```
+
++ 可以看到，超出安全整数范围的 id 无法精确表示，这个问题并不是 axios 的错。了解了什么是大整数的概念，接下来的问题是如何解决？
+
++ [json-bigint](https://github.com/sidorares/json-bigint) 是一个第三方包，它可以帮我们很好的处理这个问题。使用它的第一步就是把它安装到你的项目中。
+
+  + ```js
+    npm i json-bigint
+    ```
+
++ 下面是使用它的一个简单示例。
+
+  + ```js
+    import JSONbig from 'json-bigint'
+    
+    const str = '{ "id": 1253585734669959168 }'
+    
+    console.log(JSON.parse(str)) // 1253585734669959200
+    
+    // 它会把超出 JS 安全整数范围的数字转为一种类型为 BigNumber 的对象
+    // 我们在使用的时候需要把这个 BigNumber.toString() 就能得到原来正确的数据了
+    console.log(JSONbig.parse(str))
+    console.log(JSONbig.parse(str).id.toString()) // 1253585734669959168
+    
+    const data = JSONbig.parse(str)
+    
+    console.log(JSON.stringify(data))
+    console.log(JSONbig.stringify(data))
+    ```
+
+  + > json-bigint 会把超出 JS 安全整数范围的数字转为一个 BigNumber 类型的对象，对象数据是它内部的一个算法处理之后的，我们要做的就是在使用的时候转为字符串来使用。
+
++ 了解了 json-biginit 怎么回事儿之后，下一步是如何配置到我们的项目中？
+
+  + ```js
+    解决思路：
+    
+    Axios 会在内部使用 JSON.parse 把后端返回的数据转为 JavaScript 数据对象。
+    
+    所以解决思路就是：不要让 axios 使用 JSON.parse 来转换这个数据，而是使用 json-biginit 来做转换处理。
+    
+    axios 提供了一个 API：transformResponse
+    
+    
+    ```
+
++ 所以我们在 request.js 请求模块中添加处理代码：
+
+  + ```js
+    /**
+     * 基于 axios 封装的请求模块
+     */
+    import axios from 'axios'
+    import JSONbig from 'json-bigint'
+    
+    // 创建一个 axios 实例，说白了就是复制了一个 axios
+    // 我们通过这个实例去发请求，把需要的配置配置给这个实例来处理
+    const request = axios.create({
+      baseURL: 'http://ttapi.research.itcast.cn/', // 请求的基础路径
+    
+      // 定义后端返回的原始数据的处理
+      // 参数 data 就是后端返回的原始数据（未经处理的 JSON 格式字符串）
+      transformResponse: [function (data) {
+        // Do whatever you want to transform the data
+        // console.log(data)
+    
+        // 后端返回的数据可能不是 JSON 格式字符串
+        // 如果不是的话，那么 JSONbig.parse 调用就会报错
+        // 所以我们使用 try-catch 来捕获异常，处理异常的发生
+        try {
+          // 如果转换成功，则直接把结果返回
+          return JSONbig.parse(data)
+        } catch (err) {
+          console.log('转换失败', err)
+          // 如果转换失败了，则进入这里
+          // 我们在这里把数据原封不动的直接返回给请求使用
+          return data
+        }
+    
+        // axios 默认在内部使用 JSON.parse 来转换处理原始数据
+        // return JSON.parse(data)
+      }]
+    })
+    
+    // 请求拦截器
+    request.interceptors.request.use(
+      // 任何所有请求会经过这里
+      // config 是当前请求相关的配置信息对象
+      // config 是可以修改的
+      function (config) {
+        const user = JSON.parse(window.localStorage.getItem('user'))
+    
+        // 如果有登录用户信息，则统一设置 token
+        if (user) {
+          config.headers.Authorization = `Bearer ${user.token}`
+        }
+    
+        // 然后我们就可以在允许请求出去之前定制统一业务功能处理
+        // 例如：统一的设置 token
+    
+        // 当这里 return config 之后请求在会真正的发出去
+        return config
+      },
+      // 请求失败，会经过这里
+      function (error) {
+        return Promise.reject(error)
+      }
+    )
+    
+    // 响应拦截器
+    
+    // 导出请求方法
+    export default request
+    ```
+
+    
+
+### 自定义代码段
+
++ ![image-20211124031136630](img/image-20211124031136630.png)
++ ![image-20211124031144345](img/image-20211124031144345.png)
++ ![image-20211124031152755](img/image-20211124031152755.png)
++ ![image-20211124031216977](img/image-20211124031216977.png)
++ ![image-20211124031224619](img/image-20211124031224619.png)
++ ![image-20211124031239876](img/image-20211124031239876.png)
++ ![image-20211124031249313](img/image-20211124031249313.png)
++ ![image-20211124031301983](img/image-20211124031301983.png)
++ ![image-20211124031311217](img/image-20211124031311217.png)
++ ![image-20211124031319329](img/image-20211124031319329.png)
+
+### iconfont的使用
+
++ ![image-20211124174446360](img/image-20211124174446360.png)
++ ![image-20211124174456013](img/image-20211124174456013.png)
++ ![image-20211124174505246](img/image-20211124174505246.png)
++ ![image-20211124174516224](img/image-20211124174516224.png)
++ ![image-20211124174525554](img/image-20211124174525554.png)
++ ![image-20211124174534956](img/image-20211124174534956.png)
++ ![image-20211124174545343](img/image-20211124174545343.png)
++ ![image-20211124174555066](img/image-20211124174555066.png)
++ ![image-20211124174603889](img/image-20211124174603889.png)
++ ![image-20211124174612477](img/image-20211124174612477.png)
++ ![image-20211124174622364](img/image-20211124174622364.png)
++ ![image-20211124174631230](img/image-20211124174631230.png)
++ ![image-20211124174639551](img/image-20211124174639551.png)
+
+### .json的文件
+
++ vue项目可以新建一个.json的文件，不用导出，当你导入时可以用一个变量接，会得到对象；.json文件也不可以写导出的代码，key和value都要加引号；当导入时会把这个json文件转化为对象；如果当一个对象的属性很多，可以单独新建一个.json的模块；
+
+### 富文本编辑器
+
++ 什么是富文本编辑器：
+  + 通过使用富文本编辑器可以使文本有格式，或者说有响应的样式；原理就是以按钮的形式对输入的文本进行html标签化的处理，而不是让用户去写html标签才能使文本有样式；所以当看到的具有响应样式的文本，其本质就是一堆用户输入的文本加html标签的字符串；
+
++ ![image-20211128012040223](img/image-20211128012040223.png)
+
++ ![image-20211128011214817](img/image-20211128011214817.png)
+
++ ![image-20211128012344477](img/image-20211128012344477.png)
+
++ eltiptap富文本编辑器的使用链接：[链接](https://github.com/Leecason/element-tiptap/blob/master/README_ZH.md)
+  + 使用步骤（以下是局部引入，即在某个组件中引入）：
+  
+    1. ```js
+       npm install --save element-tiptap
+       ```
+  
+    2. ```js
+       引入样式
+       import 'element-tiptap/lib/index.css'
+       
+       ```
+  
+    3. ```js
+       // 局部引入富文本编辑器插件和相关的扩展，需要什么扩展就在这里导入；
+       import {
+         ElementTiptap,
+         // 需要的 extensions
+         Doc,
+         Text,
+         Paragraph,
+         Heading,
+         Bold,
+         Underline,
+         Italic,
+         Strike,
+         ListItem,
+         BulletList,
+         OrderedList,
+         Image,
+         Fullscreen
+       } from 'element-tiptap'
+       ```
+  
+    4. ```js
+       //在data里定义这些扩展
+       extensions: [
+               new Doc(),
+               new Text(),
+               new Paragraph(),
+               new Heading({ level: 5 }),
+               new Bold({ bubble: true }), // 在气泡菜单中渲染菜单按钮
+               new Underline({ bubble: true, menubar: false }), // 在气泡菜单而不在菜单栏中渲染菜单按钮
+               new Italic(),
+               new Strike(),
+               new ListItem(),
+               new BulletList(),
+               new OrderedList(),
+               new Image(),
+               new Fullscreen()
+             ]
+       ```
+  
+    5. ```js
+       //注册组件
+        components: {
+           'el-tiptap': ElementTiptap
+         }
+       ```
+  
+    6. ```js
+                 <!-- 富文本编辑器的使用，如果是局部引入需要添加lang属性 -->
+                 <el-tiptap
+                   v-model="article.content"
+                   :extensions="extensions"
+                   lang="zh"
+                   placeholder="请输入文章内容"
+                   height="300"
+                 ></el-tiptap>
+       ```
+  
++ 对插入富文本编辑器的图片进行处理
+
+  + 场景：
+
+    1. 当使用富文本编辑器编辑文章时，如果有插入图片，且插入的图片是在线链接，那么编辑器会把这个链接和`img`标签的`src`属性结合，以标签字符串的形式和本文章的文本标签字符串一起发送到服务器；当发起请求得到这个文章时，也是以标签字符串的形式得到，最后渲染到页面；由于图片是链接的形式，因此当在渲染得到的文章时，文本会先显示，图片会单独去请求链接，然后渲染出来；即使，图片再多，也不会卡，文字总会最先出来，然后是图片；
+    2. 如果，当我们插入图片选择插入的是本地资源，那么图片会以base64的形式变成一大堆字符串提交到服务器；当我们请求文章时，base64字符串和文章的其他文本标签字符串都是连在一起的，即会把所有的字符串都请求完成才会渲染出来；如果图片很多，base64字符串就会非常多，那么发起一次请求，就需要请求很多字符串；最后文字会和图片一起出现，那么就要用户等待，用户体验差；
+
+  + 解决场景2出现的问题：
+
+    + 思路：就是把本地资源的图片发送到服务器得到对相应的在线图片链接，然后再以`img`的形式提交到服务器；
+
+    + 原理：`new Image()`实例对象里有一个`uploadRequest() {}`函数，当点击插入本地图片按钮并选择确认时，会调用这个函数，并把选中图片地址`return`出来，那么这个地址就会被放到`img`的`src`属性里；因此，可以在这个函数里把本地图片上传到服务器得到对应的在线链接，然后把这个在线链接给这个函数return出来；如果是插入网络图片链接不会执行`uploadRequest()`函数；
+
+      ```js
+           new Image({
+                async uploadRequest(file) {
+                  // 使用FormData才可以把文件上传，file是本地的文件对象；
+                  const fd = new FormData()
+                  fd.append('image', file)
+                  const { data: res } = await uploadImage(fd)
+                  // return出得到的图片在线链接，把这个链接添加到img标签的src属性；不然默认是base64；
+                  return res.data.url
+                }
+              }),
+      ```
+
+### 文件对象，图片预览
+
++ ![image-20211203182612364](img/image-20211203182612364.png)
+
+### echarts的使用步骤
+
+1. ```js
+   npm install echarts --save
+   ```
+
+2. ```js
+   import * as echarts from 'echarts'
+   ```
+
+3. 准备好一个具备宽高的容器
+
+   ```html
+   <div class="echarts-demo" ref="main"></div>
+   ```
+
+4. 在mounted里面，写如下的代码：
+
+   ```js
+         // 基于准备好的dom，初始化echarts实例
+         var myChart = echarts.init(document.getElementById('main'));
+   
+         // 指定图表的配置项和数据
+         var option = {
+           title: {
+             text: 'ECharts 入门示例'
+           },
+           tooltip: {},
+           legend: {
+             data: ['销量']
+           },
+           xAxis: {
+             data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+           },
+           yAxis: {},
+           series: [
+             {
+               name: '销量',
+               type: 'bar',
+               data: [5, 20, 36, 10, 10, 20]
+             }
+           ]
+         };
+   
+         // 使用刚指定的配置项和数据显示图表。
+         myChart.setOption(option);
+   ```
+
+   > 注意：每个图表的中间部分，**指定图表的配置项和数据**是不一样的，其他的都一样；在echarts官网点击示例，点击图表进去的代码只是中间的指定图表的配置项和数据代码；
+
+### 在echarts里使用地图的步骤
+
+1. ![image-20211203204849498](img/image-20211203204849498.png)
+
+2. ![image-20211203204908270](img/image-20211203204908270.png)
+
+3. ![image-20211203204919878](img/image-20211203204919878.png)
+
+4. ![image-20211203204930151](img/image-20211203204930151.png)
+
+5. ![image-20211203204939591](img/image-20211203204939591.png)
+
+6. ![image-20211203204947549](img/image-20211203204947549.png)
+
+7. ![image-20211203204958581](img/image-20211203204958581.png)
+
+8. ![image-20211203205006867](img/image-20211203205006867.png)
+
+9. ![image-20211203205019107](img/image-20211203205019107.png)
+
+10. ![image-20211203205028396](img/image-20211203205028396.png)
+
+11. ![image-20211203205046059](img/image-20211203205046059.png)
+
+12. ![image-20211203205055897](img/image-20211203205055897.png)
+
+13. ![image-20211203205107841](img/image-20211203205107841.png)
+
+14. ![image-20211203205118608](img/image-20211203205118608.png)
+
+15. 在html文件引入在线的地图资源之后，就等于全局暴露了BMap，在其他组件使用要在前面加一个window；
+
+    ![image-20211203205334849](img/image-20211203205334849.png)
+
+
+
+
+### 接口文档下面这样子写就是代表是数组，且要在线链接
+
++ ![image-20211204185326557](img/image-20211204185326557.png)
+
+
+
+### 预览dist文件的方式
+
++ ![image-20211204194008945](img/image-20211204194008945.png)
+
+
+
+### axios的二次封装（前提是后端开启了跨域资源共享，如果未开启还是要配置proxy，那么就不可以这样子了）
+
++ ![image-20211211172759080](img/image-20211211172759080.png)
++ 不同的运行命令就设置不同的环境，然后就可以调用不同环境的接口了；
+  + ![image-20211211172930312](img/image-20211211172930312.png)
++ ![image-20211211173034801](img/image-20211211173034801.png)
++ ![image-20211211173114568](img/image-20211211173114568.png)
++ ![image-20211211173138321](img/image-20211211173138321.png)
++ ![image-20211211173221797](img/image-20211211173221797.png)
++ ![image-20211211173239876](img/image-20211211173239876.png)
++ ![image-20211211173249331](img/image-20211211173249331.png)
++ ![image-20211211173300934](img/image-20211211173300934.png)
++ ![image-20211211173309436](img/image-20211211173309436.png)
++ ![image-20211211173520913](img/image-20211211173520913.png)
++ ![image-20211211173606726](img/image-20211211173606726.png)
++ ![image-20211211173619436](img/image-20211211173619436.png)
++ ![image-20211211173628262](img/image-20211211173628262.png)
+
+### 文件下载
+
++ Blob是用来支持文件操作的。简单的说：在JS中，有两个[构造函数](https://www.zhihu.com/search?q=构造函数&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"article"%2C"sourceId"%3A97768916}) File 和 Blob, 而File继承了所有Blob的属性。File对象可以看作一种特殊的Blob对象。[File对象](https://www.zhihu.com/search?q=File对象&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra={"sourceType"%3A"article"%2C"sourceId"%3A97768916})是一种特殊的Blob对象，那么它自然就可以直接调用Blob对象的方法。
+
++ 通过window.URL.createObjectURL方法可以把一个blob转化为一个Blob URL，并且用做文件下载或者图片显示的链接。
+
++ 我们可以通过window.URL.createObjectURL，接收一个Blob（File）对象，将其转化为Blob URL,然后赋给 a.href属性，把具体的下载的内容赋值给 a.download 属性，然后在页面上点击这个链接就可以实现下载了；
+
+  ```js
+  <!-- html部分 -->
+  <a id="h">点此进行下载</a>
+  <!-- js部分 -->
+  <script>
+      // new出blob对象，数组里的元素类型可以是数组中的每项元素可以是ArrayBuffer(二进制数据缓冲区), ArrayBufferView,Blob,DOMString这些类型；   
+    var blob = new Blob(["Hello World"]);
+  // 把要下载的文件转化成一个链接地址赋值给a的href
+    var url = window.URL.createObjectURL(blob);
+    var a = document.getElementById("h");
+  // 给把文件名赋值给a的download属性，非ie浏览器才有download属性；
+    a.download = "helloworld.txt";
+    a.href = url;
+  </script> 
+  ```
+
+  > 注意：(备注：download属性不兼容IE, 对IE可通过window.navigator.msSaveBlob方法或其他进行优化)；
+
+### easycom模式使用vue组件
+
++ 传统[vue](https://so.csdn.net/so/search?from=pc_blog_highlight&q=vue)组件，需要安装、引用、注册，三个步骤后才能使用组件。`easycom`将其精简为一步。 只要组件安装在项目的components目录下，并符合`components/组件名称/组件名称.vue`目录结构。就可以不用引用、注册，直接在页面中使用。
+
+### window.location.search 返回值为空
+
++ window.location 对象用于获得当前页面的地址 (URL)，并把浏览器重定向到新的页面。
+
++ location.hash ：设置或返回一个URL的锚部分（从 `#` 号开始的部分）。
+
++ location.search ：设置或返回一个URL的查询部分（从 `?` 开始的部分）。
+
++ 1、示例1，url中`#`在`?`后面： `https://blog.csdn.net/article?id=94458654#first`
+
+  | 属性            | 结果                                          |
+  | --------------- | --------------------------------------------- |
+  | location.hash   | `'#first'`                                    |
+  | location.search | `'?id=94458654'`。**注意：不包含#后面的内容** |
+
++ 2、示例2，url中`#`在`?`前面： `https://blog.csdn.net/article#first?id=94458654`
+
+  | 属性            | 结果                                              |
+  | --------------- | ------------------------------------------------- |
+  | location.hash   | `'#first?id=94458654'`。**注意：包含?后面的内容** |
+  | location.search | `''`。**值为空**                                  |
+
++ 为什么 location.search 会为空？
+  + 在「示例2」中，因为`?id=94458654`是属于`location.hash`的内容，可以理解为这一部分内容先被`location.hash`取走了，`location.search`再取值就取不到了。
+
+> 如果路由模式设置为history，那么就可以去掉 # ，那么使用 location.search 就可以直接拿到查询字符串的内容；
+
+### new Map()
+
++ JavaScript的对象（Object），本质上是键值对的集合（Hash结构），但是传统上只能用字符串当作键。这给它的使用带来了很大的限制。为了解决这个问题，ES6提供了Map数据结构。它类似于对象，也是键值对的集合，但是“键”的范围不限于字符串，各种类型的值（包括对象）都可以当作键。
+
++ ```js
+   var obj = new Map() //定义一个空的map
+   obj.set('name','tom')
+   obj.set('0','tony')
+   obj.set(1,'jerry')
+  console.log(obj)
+  ```
+
+  打印结果：
+
+  ![img](img/webp.webp)
+
+  可以看到，map对象的key可以为任何值，包括数字，不仅限于字符串。
+
++ new出来的实例对象的实例的属性和操作方法：
+
+  1. size属性：size属性返回Map结构的成员总数。
+
+     ```js
+     var obj = new Map([['name', 'tom'], ['age', 12], ['sex', '男']])
+     obj.size  //3
+     ```
+
+  2. set(key, value)：set方法设置key所对应的键值，然后返回整个Map结构。如果key已经有值，则键值会被更新，否则就新生成该键。
+
+     ```js
+     // 常用写法
+     var obj = new Map()
+     obj.set("age", 12)        // 键是字符串
+     obj.set(0, "standard")     // 键是数值
+     obj.set(undefined, "nah")     // 键是undefined
+     
+     //set方法返回的是Map本身，也可以采用链式写法。
+     var map = new Map()
+     .set(1, 'a')
+     .set(2, 'b')
+     .set(3, 'c');
+     ```
+
+  3.  get(key) ：get方法读取key对应的键值，如果找不到key，返回undefined。
+
+     ```js
+     var obj = new Map()
+     obj.set("hello", 'Hello ES6!')
+     obj.get('hello')  // Hello ES6!
+     obj.get('word')  // undefined
+     ```
+
+  4. has(key) ：has方法返回一个布尔值，表示某个键是否在Map数据结构中。
+
+     ```js
+     var obj = new Map()
+     obj.set("hello", 'Hello ES6!')
+     obj.has('hello')  // true
+     obj.has('word')  // false
+     ```
+
+  5. delete(key) ：delete方法删除某个键，返回true。如果删除失败，返回false。
+
+     ```js
+     var obj = new Map()
+     obj.set("hello", 'Hello ES6!')
+     obj.has('hello')  // true
+     obj.delete('hello')
+     obj.has('hello')  // false
+     ```
+
+  6. clear() ：clear方法清除所有成员，没有返回值。
+
+     ```js
+     var obj = new Map()
+     obj.set("hello", 'Hello ES6!')
+     obj.size // 1
+     obj.clear()
+     obj.size // 0
+     ```
+
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
