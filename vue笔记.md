@@ -438,7 +438,7 @@ vue2
 
   + item, index既可以写在当前v-for控制的元素，也可以写在当前元素的子元素内；如果不需要index，就写一个item即可，可以把括号去掉；
 
-  > 注意：使用`v-for`指令，官方推荐在该元素上再绑定一个 :key 的属性，且最好该属性的值为 item.id ；不要使用index作为该属性的值；key 值必须具有唯一性，即不能重复；key 值可以为字符串或数字，但是不建议用字符串；
+  > 注意：使用`v-for`指令，官方推荐在该元素上再绑定一个 :key 的属性，且最好该属性的值为 item.id ；可以使用index作为该属性的值，到了迫不得已的时候；key 值必须具有唯一性，即不能重复；key 值可以为字符串或数字，但是不建议用字符串；
 
   ```html
   <body>
@@ -2263,7 +2263,7 @@ export default {
 
       ![image-20211107184733553](img/image-20211107184733553.png)
 
-    + 调用mutations里的函数，传参的情况
+    + 调用mutations里的函数，传参的情况()
 
       ![image-20211107190507424](img/image-20211107190507424.png)
 
@@ -2709,7 +2709,7 @@ export default {
       <!-- 绑定属性，动态改变comName -->
       <component :is="comName"></component>
       <button @click="comName = 'Left'">显示Left</button>
-      <button @click="comName = 'Right'">显示Right</button>
+      <button @click="comName = 'Right'">显示Right</button> 
   
   
     </div>
@@ -3567,6 +3567,7 @@ export default {
          > 1. vscode安装了很多插件了，要开发哪个项目，就直接在vscode打开那个项目，不要打开项目外围的文件，否则插件会不生效；
          > 2. 安装好插件之后，要在App组件和main.js里，右键打开选项，选择 使用...格式化文档，点击 配置默认格式化程序，然后再点击 prettier code-formata；
          > 3. 安装完上面的插件并配置好后，插件就会帮我们按eslint的规范格式化文档，符合代码eslint的规范，就不会报错；那么，我们写代码就不需要关注格式问题了，只要逻辑没错，格式想怎么写就怎么写；
+         > 3. ==已经把prettier关闭了，如果要打开需要在设置里，把Format On Save勾上；==
     
     
 
@@ -4019,6 +4020,18 @@ export default {
 
   + 注意：==多个hash值对应一个组件（动态路由），或者一个hash值对应一个组件都会出现路由传参；==
 
+  + 注意：![image-20220201231118609](img/image-20220201231118609.png)
+
+    + 以params的形式，路由规则必须要有占位；以query的形式则不用。
+    + 如何制定params参数可传可不传？
+      + ![image-20220201232702238](img/image-20220201232702238.png)
+      + ![image-20220201232608106](img/image-20220201232608106.png)
+    + ![image-20220201233249951](img/image-20220201233249951.png)
+    + 配置路由规则时，开启props。
+      + ![image-20220201234021659](img/image-20220201234021659.png)
+      + ![image-20220201234411414](img/image-20220201234411414.png)
+      + 
+
   + 路由传参之动态路由（params的方式），把要传递的参数放到`/`后面，这个参数叫路径参数；
 
     + 如果多个hash值对应一个组件，使用下面这种方法可以生命路由，但是复用性差：
@@ -4026,23 +4039,23 @@ export default {
     ![image-20211104150502548](img/image-20211104150502548.png)
 
     + 因此，使用下面这种提高路由规则的复用性： 
-
+  
     ![image-20211104150828880](img/image-20211104150828880.png)
 
     + 通过动态路由的方式，把路由规则中可变部分变为参数项，提高了路由规则的复用性；`:参数`相当于是一个占位符；只要路由链接的Hash值满足动态路由规则的形式，就会展示对应的组件；==多个Hash值对应一个组件；==
 
   + 1. 通过`$route`，这个路由的参数对象，组件可以拿到Hash值可变部分的路径参数，进而通过参数获取该参数所对应的数据渲染到页面，但是组件是同一个，数据不同；现实中的应用：比如每部电影都有其对应的详情信息，可以通过路由传参的方式把这步电影的 id 传进去给组件，组件拿到 id 就可以获取到这部电影的详情信息；(看下面的案例演示)
-
+  
     2. 除了上面的通过`$route`拿到动态参数值之外，还可以通过`props`拿到路径参数值；这两种方法都可以，推荐使用第二种比较简单；
-
+  
        在路由规则里开启`props`属性，只有在有动态参数时使用`props`才有意义；
-
+  
        ```js
         { path: '/movie/:mid', component: Movie, props: true },
        ```
-
+  
        开启之后就可以在这条路由规则的组件里定义一个自定义属性，属性名与动态参数名一样；
-
+  
        ```vue
        <template>
          <div class="movie_container">
@@ -4065,15 +4078,15 @@ export default {
        </style>
        
        ```
-
+  
        
-
+  
     + 注意：动态路由只是在配置路由规则时是动态的形式，在写路由链接的Hash值时，并不能写动态的，要写具体的Hash值，因为组件要通过这里的Hash值获取到参数；
-
+  
     + 案例：
-
+  
     电影组件
-
+  
     ```vue
     <template>
       <div class="movie_container">
@@ -4095,9 +4108,9 @@ export default {
     </style>
     
     ```
-
+  
     路由模块的路由规则
-
+  
     ```js
     import Vue from 'vue'
     import VueRouter from 'vue-router'
@@ -4121,9 +4134,9 @@ export default {
     export default router
     
     ```
-
+  
     根组件
-
+  
     ```vue
     <template>
       <div class="app_container">
@@ -4132,9 +4145,9 @@ export default {
     
         <router-link to="/home">首页</router-link>
         <!-- 动态路由的路由链接；多个Hash值对应同一个组件，传入路径参数； -->
-        <router-link :to="/movie/1">电影1</router-link>
-        <router-link :to="/movie/2">电影2</router-link>
-        <router-link :to="/movie/3">电影3</router-link>
+        <router-link to="/movie/1">电影1</router-link>
+        <router-link to="/movie/2">电影2</router-link>
+        <router-link to="/movie/3">电影3</router-link>
     
         <router-link to="/about">关于</router-link>
         <router-view></router-view>
@@ -4153,7 +4166,7 @@ export default {
     </style>
     
     ```
-
+  
     > ==规定：路由传参就用路径参数的形式，动态路由也用路径参数的形式；以免和查询参数的形式混了；==
     >
     > ==动态路由就是多个hash值或者多个路由链接对应一个组件；==
@@ -4179,10 +4192,10 @@ export default {
     > > 注意：通过路由显示的组件，没有和哪个组件是父子关系或者兄弟关系，所以从一个组件传递参数给路由组件只能是以路由传参的形式；而普通的组件，则有父子关系和兄弟关系，所以可以通过自定义属性和自定义事件等方式传递参数；
     >
     > 
-  
+
   + 路由传参之 query 的方式；
   
-    + 在路由链接传入查询参数，`?xx=xx$xx=xx`；
+    + 在路由链接传入查询参数，`?xx=xx&xx=xx`；
   
       > `/xx`这个叫路径参数；
   
@@ -4191,7 +4204,7 @@ export default {
     + 在组件中获取参数，仍然要使用路由参数对象`$route`；
   
     + 在写路由链接的hash值和要传递的参数的第二种写法：
-
+  
       + ```vue
             <div class="not-login" v-else>
               <!-- 从我的页面去到登录页，由于登录页的代码不是设置this.$router.back()；因此为了能回到
@@ -4212,13 +4225,13 @@ export default {
               <p>登录/注册</p>
             </div
         ```
-    
+  
       + 
-    
+  
     + 案例：
-    
+  
       路由模块
-    
+  
       ```js
       import Vue from 'vue'
       import VueRouter from 'vue-router'
@@ -4244,7 +4257,7 @@ export default {
       ```
   
       电影组件
-    
+  
       ```vue
       <template>
         <div class="movie_container">
@@ -4265,9 +4278,9 @@ export default {
       </style>
       
       ```
-    
+  
       在根组件声明路由链接并传递参数进去
-    
+  
       ```vue
       <template>
         <div class="app_container">
@@ -4297,7 +4310,7 @@ export default {
       </style>
       
       ```
-    
+  
       > 注意：
       >
       > 1. `$route`是路由的==参数对象；==
@@ -4305,7 +4318,9 @@ export default {
       > 3. 这个对象里的`fullPath`是完整的路由链接传入的字符串；
       > 4. 对象里的`path`属性值是Hash值；
       > 5. 路由传参可以只用params或者query的形式，两种用其中一种即可；
-    
+      > 5. ==非组件的router.currentRoute就是在组件里的this.$route==；
+      > 5. ==在非组件中，router.push就是组件中的this.$router.push；==
+      
       
 
 #### 编程式导航
@@ -5912,9 +5927,27 @@ export default {
     + 使用富文本编辑器上传图片时，是base64格式，转化为在线地址，不认如果文件太多会加载缓慢；如果单纯是把本地资源上传到服务器就不会有这个问题；使用富文本编辑器是因为，我们先插入到富文本，会被解析成base64；如果是一步到位上传到服务器就不会有这个问题；
   
   
-  
-  
-  
+
+### 尚品汇---前台项目
+
+#### 给src设置别名
+
++ ![image-20220205170015800](img/image-20220205170015800.png)
++ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5957,6 +5990,13 @@ export default {
 
 
 ## 扩展
+
+#### 注意点：
+
+1. 封装api接口函数时，形参直接是以对象的形式，实参也是对象的。因为如果有的参数可以传也可以不传。当调用函数时，对象的属性就可以比较自由。
+2. 字符串0，在`if`语句的条件框里是`true`，是存在的意思。数字0才是`false`。
+
+
 
 ### （普通函数，匿名函数）和箭头函数的this的区别
 
@@ -6205,7 +6245,7 @@ export default {
     console.log(str.toUpperCase()); // HELLO
   ```
   
-+ `trim()`：去除首位空格；
++ `trim()`：去除首尾空格；
 
   ```js
     let str = ' kkk  '
@@ -6224,6 +6264,29 @@ export default {
     // 会返回一个新字符串，原来的字符串不会修改；
     console.log(newstr)  //nihao world
   ```
+  
++ `startsWith()`：判断字符串是否是以xx开头；`endsWith()`：判断字符串是否是以xx结尾；
+
+  ```js
+    var str = '今天是2022年2月26日'
+  
+    var flag1 = str.startsWith('今天')
+    var flag2 = str.endsWith('日')
+  
+    console.log(flag1); // true
+    console.log(flag2); // true
+  
+  ```
+
++ `repeat()`：表示将原字符串重复n次，返回一个新字符串；
+
+  ```js
+   var str = '胡'
+    var newStr = str.repeat(3)
+    console.log(newStr); // 胡胡胡
+  ```
+
+  
 
 ### 正则表达式的构造函数
 
@@ -6719,7 +6782,7 @@ export default {
 
   + 返回值为布尔值；满足条件为true，不满足条件为false；
 
-  + 用途：用来寻找数组的某一项，或者遍历到符合条件就停止；
+  + 用途：==用来寻找数组的某一项是否满足条件，只要有一项满足就是true；(相当于或)==
 
   + ```js
       let arr = ['中国','美国','英国','俄罗斯']
@@ -6747,7 +6810,7 @@ export default {
 
   + **如果数组元素的每一项都满足这个条件，那么返回值为true，只要有一项不满足就是false；**
 
-  + 用途：用来判断数组里的每一项是否满足某个条件；
+  + 用途：==用来判断数组里的每一项是否都满足某个条件，都满足就是true。（相当于且）==；
 
   + ```js
       let arr = ['中国','中国','中国','中国']
@@ -7718,7 +7781,3003 @@ export default {
      obj.size // 0
      ```
 
+### 获取对象属性值的两种写法
+
+```js
+let obj = {name: 'hulubin'}
+  console.log(obj.name)  // hulubin
+  console.log(obj['name'])   // hulubin
+```
+
+### git（详细版，以后都看这里）
+
++ 为什么要使用版本控制？
+
+  + 对于个人开发，需要历史记录的存在。
+  + 对于团队的开发，为了避免不同的成员开发的代码被覆盖，影响效率。
+
++ 版本控制工具应该具备的功能
+
+  1. 协同修改
+     + 多人并行不悖的修改服务器端的同一个文件。
+  2. 数据备份
+     + 不仅保存目录和文件的当前状态，还能够保存提交过的每一个历史状态。
+  3. 版本管理
+     + 在保存每一个版本文件信息时做到不保存重复的数据，以节约存储空间。
+  4. 权限控制
+     + 对于团队中参与开发的人员进行权限控制。
+  5. 历史记录
+     + 查看修改人，修改时间，修改内容，日志信息。
+     + 将本地文件恢复到某一历史状态。
+  6. 分支管理
+     + 允许开发团队在工作过程中多条生产线同时推进任务，进一步提高效率。
+
++ 版本控制工具（是一个软件）
+
+  + 集中式版本控制工具：svn。
+    + 特点：文件的所有历史记录都保存在服务器中，程序员电脑只保存当前状态的文件信息。
+    + 缺点：如果服务器坏了，那么所有的历史版本都将消失，只有程序员的电脑里的当前状态的版本。
+  + 分布式版本控制工具：git。
+    + 特点：每一个程序员的电脑的本地库都存着当前项目的所有版本记录。
+    + 好处：如果某个程序员的电脑出故障，历史记录都不见了，可以拿参与这个项目的程序员的版本历史记录。但是常规的操作并不是程序员与程序员本地库之间的互传，而是需要一个远程库。
+
++ git优势
+
+  + 由于本地有自己的版本库，大部分操作在本地操作，不需要联网。
+  + 完整性保证（hash）。
+  + 尽可能添加数据而不是删除或者修改数据。
+  + 分支操作非常快捷流畅。
+  + 与Linux命令全面兼容（因为是Linux系统的发明者发明的）。
+
++ git程序的安装
+
+  + 下载地址：https://git-scm.com/
+
+  + 安装步骤
+
+    1. ![image-20220227171835506](img/image-20220227171835506.png)
+
+    2. ![image-20220227172108689](img/image-20220227172108689.png)
+
+    3. ![image-20220227172159348](img/image-20220227172159348.png)
+
+    4. ![image-20220227172246295](img/image-20220227172246295.png)
+
+    5. ![image-20220227172826492](img/image-20220227172826492.png)
+
+    6. ![image-20220227173104419](img/image-20220227173104419.png)
+
+    7. ![image-20220227173410950](img/image-20220227173410950.png)
+
+    8. ![image-20220227173523544](img/image-20220227173523544.png)
+
+    9. ![image-20220227173700971](img/image-20220227173700971.png)
+
+    10. ![image-20220227173834226](img/image-20220227173834226.png)
+
+    11. 装好了之后，在任何一个文件夹点击右键都会有如下的效果。
+
+        ![image-20220227174006900](img/image-20220227174006900.png)
+
+    12. 点击如下就可以使用git
+
+        ![image-20220227174152590](img/image-20220227174152590.png)
+
+        
+
++ git在==本地==的结构
+
+  1. 工作区：写代码的地方，在工作区就是做比如代码的修改，文件的新建等等。就是版本的当前状态。
+  2. 暂存区：临时存储。打算提交的，但是还没提交，暂时存放在这里。可以去提交到本地库，也可以去撤销回来。暂存区存在的意义就是如果提交到这里后悔了可以撤销，暂时不会形成版本。一旦提交到本地库就会形成版本，这个版本就固定了，无法撤销。
+  3. 本地库：存储历史版本。每次提交就会产生历史版本。有本地库的分支。
+
++ 代码托管中心
+
+  + 我们本地库已经有了历史版本，为什么需要代码托管中心？
+    + 代码托管中心的任务：维护远程库。
+  + 在局域网（公司内网）的环境下
+    + 可以搭建一个GitLab服务器作为代码托管中心。
+  + 在外网环境下
+    + GitHub或者码云作为代码托管中心。
+
++ 本地库和远程库的交互方式
+
+  + 团队内部协作
+    1. 项目经理先在本地初始化一个本地库（一个文件夹），并且这个本地库有项目的所有代码。
+    2. 然后项目经理在代码托管中心（比如GitHub）创建一个远程库。
+    3. 项目经理把本地库的某个分支推送到远程库，远程库和本地库就具有了相同的代码。
+    4. 程序员甲从远程库克隆clone项目经理的远程库，在克隆时Git会自动在程序员甲的电脑初始化一个本地库，那么这个本地库就有了远程库的数据和历史版本。
+    5. 如果程序员甲在克隆下来的代码做了修改，想要推送到远程库，那么要得到项目经理的权限加入团队才可以。
+    6. 当程序员甲推送完成之后，项目经理想要看他做的修改。就要从远程库拉取下来代码到项目经理的本地库。
+  + 跨团队协作
+    1. 如果项目经理有一个任务交给程序员甲，然而他不会。但是他另外一个公司的朋友会，他就邀请他帮忙。
+    2. 首先，他朋友并不是程序员甲公司的人，没有权限加入团队。因而就不能通过克隆项目经理的远程库并做push。
+    3. 他朋友可以通过fork项目经理的远程库，即相当于复制一份项目经理的远程库变成他朋友自己的远程库。
+    4. 他朋友的远程库和项目的经理的远程库里面的代码完全相同。
+    5. 他朋友得到远程库之后，先克隆到本地库。做了修改之后再推送到自己的远程库。由于是他朋友的远程库，因此就有了对远程库做push的权限。
+    6. 任务完成之后，他朋友向项目经理的远程库发起pull reuqest，项目经理审核代码。审核通过就merge合并他朋友远程库的代码到项目经理的远程库。
+    7. 然后，项目经理和程序员甲就可以拉取远程库去看并运行。
+
++ git命令行操作
+
+  > `unstage`可以理解为不暂存。
+  >
+  > 空格向下翻页。
+  >
+  > `b`向上翻页。
+  >
+  > `q`退出。
+
+  + **本地库操作**
+
+    + 本地库初始化
+
+      1. 打开项目的文件夹
+
+      2. 在空白的地方右键，点击Git Bash Here
+
+      3. 在命令行输入`git init`，初始化一个本地库
+
+      4. 它说创建一个空本地库在`.git`文件夹里
+
+         ![image-20220227184745375](img/image-20220227184745375.png)
+  
+      5. 这个`.git`文件夹存放的是本地库文件夹里面的子目录和文件，不要删除，也不要修改
+  
+    + 设置签名
+  
+      > 作用：区分不同的开发人员。不然团队协作时，大家都提交代码就不知道是谁操作的。设置哪个邮箱，就可以看到是哪个github账号提交的代码。
+      >
+      > 辨析：代码托管中心（GitHub）的用户名，密码等和Git设置的签名一点关系也没有。
+      >
+      > 级别：分为项目级别（仓库级别）和系统用户级别。
+      >
+      > + 项目级别的签名只在当前设置的项目生效。
+      > + 系统用户级别的签名就是登陆当前系统的用户。
+      > + 二者都没有是不允许，至少设置一个。
+  
+      + 项目级别：通过`git config user.name xxx`设置用户名。通过`git config user.email xxx@qq.com`设置邮箱。
+      + 系统用户级别：通过`git config --global user.name xxx`设置用户名。通过`git config --global user.email xxx@qq.com`设置邮箱。==设置系统用户级别就够了==。
+  
+    + 查看签名
+  
+      + git config user.name     git config user.email     git config --global user.name
+
+    + 基本操作
+  
+      + 查看工作区和暂存区的状态：`git status`
+  
+        + 如果是红色的代表工作区有文件新增或者修改，没有添加到暂存区。
+          + （不用记，会提示，看得懂就可以）在工作区撤销所做的修改：`git checkout -- <file>`。
+        + 绿色代表是存放在暂存区的文件，等待被提交到本地库。
+          + （不用记，会提示，看得懂就可以）从暂存区撤销新建的文件：`git rm --cached <file>`。
+          + （不用记，会提示，看得懂就可以）从暂存区撤销新修改的：`"git reset HEAD <file>`。
+
+      + 添加新的文件或者修改到暂存区：`git add 文件名`或者`git add .`
+
+      + 添加到本地库形成历史版本：`git commit -m '日志'`（把暂存区的文件全部提交）或者`git commit -m '日志' 文件名`（只提交指定的文件到本地库）。
+  
+        + 出现了版本号，日志等就是代表提交到本地库成功，如下图
+  
+          ![image-20220227200047743](img/image-20220227200047743.png)
+  
+      + 查看本地库的历史版本
+  
+        + `git log`：详细显示本地库的历史版本。
+        + `git log --pretty=oneline`：只显示完整的hash（版本号）和日志。
+        + ==`git log --oneline`==：只显示部分的hash（版本号）和日志。（==直接用这个查看历史记录==）
+        + ==`git reflog`==：显示部分的hash，到那个版本需要走几步，和日志。（==如果要回到最新版本的记录，要用这个查看，因为这个可以查看所有的记录==）
+  
+      + 前进或后退本地库历史版本的本质
+  
+        + Git本地库有一个名为`HEAD`的指针，当把指针前进或者后退就可以切换历史版本。
+  
+      + 前进或后退历史版本操作
+  
+        1. 基于版本号(hash)：`git reset --hard c62435e`
+           + 注意：在版本切换之前，如果在工作区还做了修改等操作，先把工作区添加到暂存区，然后提交到本地库形成历史版本。因为如果不形成版本，当你切换到别的版本时，再切换回最近的版本，那你之前做的修改都会不见了，因为回到某个版本时，暂存区和工作区都是刚提交了这个版本的状态，即都初始化好了。
+  
+      + 前进或后退历史版本的作用
+  
+        + 如果当前的版本的某个文件被删除，可以回退到没有被删除那个版本。
+        + 可以回到本地库中想要的版本。
+  
+      + 比较文件差异
+  
+        + 工作区文件与暂存区文件比较差异：`git diff`（比较所有的文件）或者`git diff 文件名`（某个文件的前后比较）。如果暂存区没有文件，就是当前工作区和上次提交暂存区后的状态的工作区比较。
+        + 工作区文件与本地库历史版本的文件比较差异：`git diff 版本号`。
+  
+        
+  
+    + 分支管理
+  
+      + 什么是分支？
+  
+        + 在版本控制过程中，使用多条线同时推进多个任务。
+        + 本地库初始化好后就有一个master分支，或者叫做主干。每一个分支都会有其历史版本的存在。
+        + 如果要开发一个功能，不想在matser分支做开发，以免对它造成污染。可以从主分支新开辟一个分支，这个新分支刚开始创建时内容是和master分支一样的，即复制过来的。喜欢以feature_xx命名来代表某个功能。
+        + 各个分支在开发过程中是彼此独立，互不影响，避免了不同功能的代码混杂在一起，互相干扰。如果某一分支开发失败了，直接把该分支删除就可以。方便去试错。
+        + 各个分支可以齐头并进开发，提高开发效率。
+        + 如果某一分支开发完了，可以合并到主干。对于主干来说相当于是一个版本的升级。
+        + 如果主干在运行中出现bug，就要及时修复，往往会从主干新建出一个分支去单独修复。但是如果主干是正在运行的程序，不能停掉，那么这个分支名就可以叫做hot_fix，即热修复。停掉程序做修复叫做冷修复。等修复好了之后再合并到主干。
+  
+      + 分支的好处
+  
+        1. 同时并行推进多个功能的开发，提高开发效率。
+        2. 各个分支在开发过程中，如果一个分支开发失败了，不会对于其他的分支造成影响。
+  
+      + 分支操作
+  
+        + 新建本地库分支：`git branch 分支名`
+  
+        + 查看本地库分支：`git branch -v`
+  
+        + 切换本地库分支：`git checkout 分支名`
+  
+        + 合并分支
+  
+          1. 切换到要合并到的分支
+          2. 合并某个分支到当前的分支：`git merge 分支名`
+  
+        + 合并分支产生冲突的原因及解决
+  
+          + 由于不同的分支都可以做修改，会各自产生不同的历史版本。如果不同的分支==同时==改动的是==同一个文件的同一个位置==，Git在合并的时候就会拿不定注意，自动合并失败，要我们手动合并分支。如果==只有一个分支==做了修改两个分支的同一个地方，那么就会以做了修改的分支为主去合并。
+  
+          + 因此，不要使用自动格式化工具，否则当前分支的格式会变得与另外分支的格式不同，尽管你对代码没改动，但是只要两个分支的同一个文件的同一个位置内容不一样就会产生冲突。
+  
+          + 冲突的表现：
+  
+            + ![image-20220228163142777](img/image-20220228163142777.png)
+  
+          + 解决冲突
+  
+            1. 由于可能是不同的人写的同一个位置，因此要去探讨或者自己决定要保留哪个分支的内容，是主分支的内容呢还是拿过来合并的内容。
+            2. 把那些箭头和等号删除，那个只是一个标记，让你知道哪个内容是当前分支的，哪个内容是拿来合并分支的。
+            3. 然后删除谁保留谁。或者不删除也可以，只删除箭头和等号。
+  
+            
+  
+  + **远程库操作**
+  
+    > 一：
+    >
+    > GitHub的登录用户名：hulubin111
+    >
+    > GitHub的登录邮箱：1442188062@qq.com
+    >
+    > GitHub的密码：1965324118HLb
+    >
+    > 二：
+    >
+    > GitHub的登录用户名：hulubin
+    >
+    > GitHub的登录邮箱：13615068398h@sina.com
+    >
+    > GitHub的密码：1965324118HLb
+    >
+    > 
+    >
+    > 
+  
+    + 先在本地初始化一个本地库。
+  
+    + 把本地库推到远程库。
+  
+      + 远程库的创建
+  
+        + 如果为公共库，别人都可以看和克隆，但是没有权限推送代码，默认只有绑定创建这个远程库的github账号的本地库有权限推送代码，可以添加成员。
+  
+      + 在本地给远程库地址起别名：`git remote add origin https://github.com/1hul/gitTest.git `。那么`origin`就是远程库的别名。
+  
+        > 创建好远程库之后，一串网址就是远程库的地址。
+        >
+        > ​	![image-20220228180610217](img/image-20220228180610217.png)
+        >
+        > 但是每次要推送本地库的代码到远程库时，总要带这么一长串地址很麻烦，所以就要给它起个别名。
+  
+      + 查看本地的远程库地址的别名：`git remote -v`。
+  
+      + 把本地库的某个分支推送到远程库的某个分支：`git push 远程库地址别名 本地库分支名:远程库分支名 `，但是可以简写`git push 远程库地址别名 分支名`。如，`git push origin master`，就是把本地库的`master`分支推送到远程库的`master`分支，如果远程库没有`master`分支会立即自动创建。
+  
+        > 在推送到远程库时，会在本地登录代码托管中心的账号(GitHub或码云)，这样子本地库就与代码托管中心相绑定了。你就有权利对远程库进行推送代码。只要登录一次就会在凭据管理器保存你的登录信息。如果要切换代码管理中心的账号与本地库的绑定，就要去凭据管理器删除保留的账号信息，下次要推代码到远程库就会重新登录。有时候把凭据管理器的账号给删了，重新登录时还是自动登录原来的账号，要把浏览器的历史记录都删除了重新来。
+  
+      + 从远程库克隆到本地库：`git clone 远程库的地址`
+  
+        1. 只需要在本地创建一个文件夹，并执行克隆操作。
+        2. 就会把远程库的分支里的所有内容都复制一份到本地库。
+        3. 会自动在该文件夹初始化一个本地库。
+        4. 会自动在该本地库创建一个origin的远程库地址别名。
+  
+      + 邀请别的GitHub账号加入团队
+  
+        > 由于每个本地仓库都绑定着一个GitHub(或码云)的账号，要想推送代码到远程仓库必须符合两个条件的其中一个：
+        >
+        > 1. 远程仓库所在的GitHub账户和本地库所绑定的GitHub账户相同。
+        > 2. 远程仓库所在的GitHub账户授权想要推送代码到这个远程库的本地库所绑定的GitHub账户。
+        >
+        > 如果不满足以上其中一个条件，就报403的错误：
+        >
+        > ![image-20220228203852452](img/image-20220228203852452.png)
+  
+        邀请别的账号进团队，使之有权对某个远程库进行推送代码：
+  
+        1. ![image-20220228205343440](img/image-20220228205343440.png)
+        2. ![image-20220228205550715](img/image-20220228205550715.png)
+        3. ![image-20220228205643651](img/image-20220228205643651.png)
+        4. ![image-20220228205757147](img/image-20220228205757147.png)
+        5. ![image-20220228205900098](img/image-20220228205900098.png)
+  
+      + 接受邀请步骤
+  
+        1. ![image-20220228210252262](img/image-20220228210252262.png)
+        2. ![image-20220228210333409](img/image-20220228210333409.png)
+  
+      + 
+  
+      
+  
+      
+  
+      
+
+
+
+### for of和for in
+
+遍历数组
+
+```js
+ //for of  遍历数组的元素
+    for(let a of array){
+        console.log(a)
+    }
+
+    //for in  遍历数组的索引
+    for(let b in array){
+        console.log(b) // 遍历索引
+        console.log(array[b]) // 遍历元素
+    }
+```
+
+遍历对象
+
+```js
+var obj = {
+    id: 1,
+    uname: 'hu',
+    sex: 'nan'
+}
+for(var k in obj) {
+    console.log(k) // 遍历对象属性名
+    console.log(obj[k]) // 遍历对象属性值
+}
+```
+
+
+
+### 关闭eslint
+
++ ![image-20220127130042051](img/image-20220127130042051.png)
+
+### 侧边栏导航，要使用到路由重定向，不使用默认子路由。
+
+
+
+
+
+## js高级
+
+### ES6中的类
+
++ 类：泛指某一大类，抽取对象公有的行为和特征。
+
++ 对象：特指某一具体的对象。
+
++ 创建类：
+  
+  + ```js
+      // 创建类
+      class Star {
+          // 通过构造函数给类添加属性
+        constructor(uname, age) {
+          this.uname = uname
+          this.age = age
+        }
+          // 给类添加方法，不需要逗号分隔
+        sing(song) {
+          // 在方法里可以直接使用实例对象的属性
+          console.log(this.uname + song);
+        }
+      }
+      
+      // 通过类生成实例对象（使用new关键字就是调用constructor构造函数。）
+      
+      var ldh = new Star('刘德华', 18)
+      
+      console.log(ldh.uname); // 刘德华
+      console.log(ldh.age);  // 18
+      ldh.sing('冰雨')  // 刘德华冰雨
+      
+      var zxy = new Star('张学友', 20)
+      
+      console.log(zxy.uname); // 张学友
+      console.log(zxy.age);  // 20
+      zxy.sing('吻别')  // 张学友吻别
+    ```
+  
+  + ![image-20220203151701804](img/image-20220203151701804.png)
+  
+  + ![image-20220203153141622](img/image-20220203153141622.png)
+  
++ 类的继承：
+
+  + 所谓的继承就是把要继承的父类的属性和方法拷贝一份到子类，从而省略了子类的代码量，免得重新书写。
+
+  1. 子类下面这么写时：
+  
+     ```js
+       // 创建父类
+       class Father {
+         constructor(x, y) {
+           this.x = x
+           this.y = y
+         }
+         add() {
+           console.log(this.x + this.y);
+         }
+       }
      
+       // 子类继承父类
+       class Son extends Father {
+         constructor(x, y) {
+           this.x = x
+           this.y = y
+         }
+     
+       }
+       // 通过new调用构造函数constructor
+       var son = new Son(1, 2)
+     
+      
+       console.log(son.x); // 报错，逻辑是没错，但是硬性要求必须要先使用super关键字在子类的this之前。
+       console.log(son.y); // 报错
+       son.add() // 报错，这个报错是因为父类的this.x和y没有数据。
+     
+     ```
+  
+  2. 上面的要如下写才不会报错：
+  
+     ```js
+       // 创建父类
+       class Father {
+         constructor(x, y) {
+           this.x = x
+           this.y = y
+         }
+         add() {
+           console.log(this.x + this.y);
+         }
+       }
+     
+       // 子类继承父类
+       class Son extends Father {
+         constructor(x, y) {
+           // super关键字调用父类的构造函数，相当于constructor(x, y)；
+           // 把子类的数据传递给父类，那么父类的this.x就是子类传递过去的数据。
+           super(x, y)
+         }
+     
+       }
+       // 通过new调用构造函数constructor
+       var son = new Son(1, 2)
+     
+       // 如果子类里面写如1.的样子不可以，且当调用父类里面的方法时，
+       // 父类的this是父类的实例对象，子类的this是子类的实例对象。
+       // 要把子类的数据传给父类的构造函数，即调用父类的构造函数。通过super关键字可以调用父类的构造函数和普通函数。
+     
+       console.log(son.x); // 1
+       console.log(son.y); // 2
+       son.add() // 3
+     ```
+  
+     > 注意：`super`可以调用父类的构造函数和普通函数。调用的方式有点区别。
+     >
+     > ```js
+     > // 创建父类
+     > class Father {
+     >   say() {
+     >     console.log('我是爸爸');
+     >   }
+     > }
+     > 
+     > // 子类继承父类
+     > class Son extends Father {
+     >   say() {
+     >     console.log('我是儿子');
+     >     // super可以调用父类的构造函数和普通函数
+     >     super.say() // 我是爸爸
+     >   }
+     > }
+     > 
+     > var son = new Son()
+     > // 如果子类中有这个方法就调用子类的。如果子类没有，父类有，就调用父类的。（就近原则）
+     > son.say() // 我是儿子
+     > ```
+  
+  3. 子类的`this`之前必须先使用`super`关键字。否则会报错。==super关键字会改变父类的this指向变为子类的实例对象==。使用`super`关键字就是调用父类的构造函数，把它里面的代码在子类的构造函数里执行一遍，并会自动改变this指向为子类实例对象。方法会自动继承。
+
+     ```js
+      // 创建父类
+       class Father {
+         constructor(x, y) {
+           this.x = x
+           this.y = y
+         }
+         add() {
+           console.log(this.x + this.y);
+         }
+       }
+     
+       // 子类继承父类
+       class Son extends Father {
+         constructor(x, y) {
+           // 子类继承时，在this之前必须先使用super关键字调用父类的构造函数。
+           super(x, y)
+           this.x = x
+           this.y = y
+         }
+         sub() {
+           console.log(this.x - this.y);
+         }
+     
+       }
+       // 通过new调用构造函数constructor
+       var son = new Son(5, 2)
+     
+       son.sub() // 3
+       son.add() // 7
+     ```
+  
++ ES6中类和对象的三个注意点：
+
+  1. ES6中类没有变量提升，必须先定义类，才可以通过类实例化对象。
+
+     ```js
+      class Star {
+        constructor(x, y) {
+         this.x = x
+         this.y = y
+        }
+      }
+     // new就是调用constructor构造函数
+      var ldh = new Star(1, 2)
+     ```
+
+  2. 类里面的共有属性和方法，必须通过`this`使用：
+
+     ```js
+      class Star {
+        constructor(x, y) {
+         this.x = x
+         this.y = y
+         // 要使用this
+         this.sing()
+        }
+        sing() {
+        
+          console.log(this.x); 
+        }
+      }
+     
+     // 直接调用constructor构造函数
+      var ldh = new Star(1, 2) // 1
+     ```
+
+  3. 类里面`this`的指向问题：
+
+     类里面的`constructor`构造函数里的`this`就是实例对象。类里面的普通函数的`this`是函数的直接调用者(但是普通函数的`this.属性`都是指实例对象的属性，所以如果普通函数的`this`不是实例对象，要手动指向实例对象)。
+
+     ```js
+     <body>
+       <button>点击</button>
+     </body>
+     <script>
+       // 定义一个全局变量存构造函数的this，即实例对象。
+       var that
+      class Star {
+        constructor(x, y) {
+          that = this
+         this.x = x
+         this.y = y
+         // 注意：这里的sing千万不能加括号，不然就是直接调用了。
+         // this.sing的this是固定的写法，在类里面必须要有this才能使用属性和方法。
+         document.querySelector('button').onclick = this.sing
+        
+        }
+        sing() {
+         // this是这个函数的直接调用者。在上面调用它的是button。所以打印出来是undefined
+         //  console.log(this.x); 
+     
+         // 这个that就是实例对象
+          console.log(that.x); 
+     
+        }
+      }
+     
+     // 直接调用constructor构造函数
+      var ldh = new Star(1, 2) // 1
+     
+     
+     
+     
+     </script>
+     ```
+     
+     > ==类的继承原理==：类的继承要`extends`和`super`一起配合使用。类的继承应该这样子理解：`extends`会把方法给继承过来到子类，会改变把父类构造函数调用到子类构造函数的`this`指向为子类的实例对象。普通函数的`this`指向不用改变，它的指向为这个函数的直接调用者。`super`的作用就是调用父类的构造函数，使父类的构造函数的代码运行到子类的构造函数里，那么子类的构造函数的代码就和父类构造函数的代码一样了，这样子实现了属性的继承。
+
+### ES5中的构造函数（函数也是对象）和原型对象
+
++ 背景：在ES6之前是没有类的概念的，创造对象要通过构造函数。
+
++ 构造函数：
+
+  + 用来初始化对象，把对象的公共属性和公共方法抽取出来。
+
+  + `new`在执行时会做四件事：
+
+    1. 在内存中会创建一个新的空对象。
+    2. 让`this`指向这个空的新对象。
+    3. 执行构造函数里的代码，给新对象添加属性和方法。
+    4. 返回这个新对象。（构造函数不需要return）
+
+  + ```js
+     function Star(uname, age) {
+       this.uname = uname
+       this.age = age
+       this.sing = function() {
+         console.log('唱歌');
+       }
+     }
+      
+     var ldh = new Star('刘德华', 18)
+     ldh.sing() // 唱歌
+    ```
+
+  + 构造函数里的属性和方法，称之为成员，成员是可以添加的。
+
+    + 实例成员：通过`this`在构造函数里添加的。只能通过实例对象访问。
+
+      ```js
+       function Star(uname, age) {
+        //  以下都为实例成员：
+         this.uname = uname
+         this.age = age
+         this.sing = function() {
+           console.log('唱歌');
+         }
+       }
+      
+       var ldh = new Star('刘德华', 18)
+      //  通过实例对象访问
+       console.log(ldh.uname); // 刘德华
+       ldh.sing() // 唱歌
+      ```
+
+    + 静态成员：通过构造函数添加的，只能通过构造函数访问。
+
+      ```js
+       function Star(uname, age) {
+        //  以下都为实例成员：
+         this.uname = uname
+         this.age = age
+        
+       }
+      //  静态成员
+       Star.sex = '男'
+      //  只能通过构造函数访问
+       console.log(Star.sex); // 男
+      
+       var ldh = new Star('刘德华', 18)
+      //  通过实例对象访问
+       console.log(ldh.uname); // 刘德华
+      ```
+
++ 原型对象`prototype`：(是对象)
+
+  + ![image-20220203204742572](img/image-20220203204742572.png)
+
+  + 如果在构造函数里通过`this`直接添加方法，由于每次实例化对象都会开辟一个空间用来存方法，太浪费内存。
+
+  + ![image-20220203205838830](img/image-20220203205838830.png)
+
+  + ==总结：公共属性定义到构造函数里。公共方法放到原型对象上。==
+
+  + ```js
+     function Star(uname, age) {
+      
+       this.uname = uname
+       this.age = age
+      //  方法定义到原型对象上
+      //  this.sing = function() {
+      //    console.log('唱歌');
+      //  }
+      
+     }
+      
+     Star.prototype.sing = function() {
+        console.log('唱歌');
+     }
+      
+     var ldh = new Star('刘德华', 18)
+     ldh.sing() // 唱歌
+    ```
+
++ 对象的`__proto__`属性：（是对象）
+
+  + ![image-20220203212306089](img/image-20220203212306089.png)
+
+  + ```js
+    function Star(uname, age) {
+      
+       this.uname = uname
+       this.age = age
+      
+     }
+    
+     Star.prototype.sing = function() {
+        console.log('唱歌');
+     }
+    
+     var ldh = new Star('刘德华', 18)
+    //  为什么实例对象可以访问到原型对象的属性和方法呢？
+     ldh.sing() // 唱歌
+    // 因为每一个对象都有一个__proto__属性，这个属性的属性值指向构造函数的prototype属性的属性值，两者是等价的。
+    console.log(ldh.__proto__ === Star.prototype); // true
+    
+    ```
+
++ 构造函数的`prototype`属性的属性值和实例对象的`__proto__`属性的属性值都是对象，且是等价的。这两个对象都有一个`constructor`属性，属性值为生成这个对象的构造函数。其作用就是能够知道生成这个对象的构造函数是谁。
+
+  + ```js
+     function Star(uname, age) {
+      
+       this.uname = uname
+       this.age = age
+      
+     }
+      
+     Star.prototype.sing = function() {
+        console.log('唱歌');
+     }
+      
+     var ldh = new Star('刘德华', 18)
+      
+     console.log(Star.prototype.constructor); // 指向构造函数
+     console.log(ldh.__proto__.constructor); // 指向构造函数
+    ```
+
+  + `constructor`属性的作用：利用这个属性手动指回原来的构造函数：
+
+    + ```js
+       function Star(uname, age) {
+        
+         this.uname = uname
+         this.age = age
+        
+       }
+        
+      // 如果公共方法太多了，用下面这么写太麻烦了。
+      //  Star.prototype.sing = function() {
+      //     console.log('唱歌');
+      //  }
+      //  Star.prototype.movie = function() {
+      //     console.log('演电影');
+      //  }
+      
+      
+      // 采用对象的形式
+      Star.prototype = {
+        sing: function() {
+          console.log('唱歌');
+        },
+        movie: function() {
+          console.log('演电影');
+        },
+        // 由于原型对象有constructor这个属性指向构造函数，因此当以对象字面量的形式添加公共方法时，
+        // 要利用constructor属性手动指回构造函数
+        constructor: Star
+      }
+       var ldh = new Star('刘德华', 18)
+      
+       console.log(Star.prototype.constructor); // 指向构造函数
+       console.log(ldh.__proto__.constructor); // 指向构造函数
+      ```
+
+  + ![image-20220203221803101](img/image-20220203221803101.png)
+
+  + 原型链（每个对象都有一个`__proto__`属性指向构造函数的原型对象）：
+
+    + 当通过构造函数实例出一个对象之后，如果要访问某个成员（即属性或者方法）。如果构造函数里有这个成员，那么就是访问构造函数里的。如果构造函数里没有，就通过实例对象的`__proto__`属性访问构造函数的`prototype`原型对象里的成员。如果这个构造函数的原型对象里还是没有这个成员，那么就是接着通过构造函数的原型对象的`__proto__`属性访问`Obeject`的原型对象里的成员。如果在没有则`Obeject`的原型对象的`__proto__`属性指向就是空的，就真的没有这个成员了。这样子就形成一条原型链，==这条原型链是对象的成员查找规则==。如果多个原型对象都有某个成员，则按就近原则。
+    + ![image-20220203223541901](img/image-20220203223541901.png)
+
+  + `this`指向问题：
+
+    + 构造函数和原型对象里的`this`都是指向实例对象。
+
+  + 原型对象的应用（拓展内置对象的方法或属性）：
+
+    ```js
+      // 数组没有求和的方法，可以手动添加
+    Array.prototype.sum = function() {
+      var sum = 0
+      for(var i = 0; i < this.length; i++) {
+        sum += this[i]
+      }
+      return sum
+    }
+    
+    // 注意：不能通过下面这种方式。因为内置对象的原型对象还有其他的公共方法，一旦使用如下的方式添加新方法，
+    // 就会把原来的内置对象的其他方法给覆盖掉了。只能用上面的方式。
+    // Array.prototype = {
+    //   sum: function() {
+    //     var sum = 0
+    //     for(var i = 0; i < this.length; i++) {
+    //     sum += this[i]
+    //     }
+    //     return sum
+    //   },
+    //   constructor: Array
+    // }
+    
+    var arr = [1, 2, 3]
+    console.log(arr.sum()); // 6
+    ```
+
+
++ `call()`方法：
+
+  + 作用：可以调用函数，可以改变被调用的函数的`this`指向，可以传递函数实参。
+
+  + ```js
+      var obj = {
+        uname: 'hulubin'
+      }
+      
+    function fn() {
+      console.log(this);
+     
+    }
+    
+    function fn1(x, y) {
+      console.log(this);
+      console.log(x);
+      console.log(y);
+    }
+    
+    // 正常函数的调用
+    fn() // window
+    
+    // 使用call方法调用函数
+    fn.call() // window
+    
+    // 使用call方法既可以调用该函数，又可以改变该函数的this指向
+    fn.call(obj) // {uname: 'hulubin'}
+    
+    // 还可以给该函数传递实参
+    fn1.call(obj, 1, 2) // {uname: 'hulubin'}  1  2
+    ```
+
++ 构造函数里属性和原型对象里方法的继承：
+
+  + 属性继承（就是把父构造函数的代码在子构造函数里执行一遍，并要改变this指向）：
+
+    + ```js
+      function Father(uname, age) {
+        this.uname = uname
+        this.age = age
+      }
+      
+      function Son(uname, age, score) {
+        // 继承父构造函数的原理：调用父构造函数，把它的代码在子构造函数执行，并通过call方法改变父构造函数的this为
+        // 子构造函数的实例对象。
+        Father.call(this, uname, age)
+        // 子构造函数自己的属性
+        this.score = score
+      }
+      
+      var son = new Son('胡鹭斌', 26, 100)
+      console.log(son); // {uname: '胡鹭斌', age: 26, score: 100}
+      
+      ```
+
+  + 方法的继承：
+
+    + 下面的方式是不对的：
+
+      ```js
+      function Father() {
+       
+      }
+      Father.prototype.exam = function() {
+        console.log('考试');
+      }
+      
+      
+      function Son() {
+      }
+      
+      // 如果把父构造函数的原型对象直接赋值给子构造函数的原型对象，一旦给子构造函数的原型对象修改成员，
+      // 父构造函数的原型对象也会被一起修改。
+      Son.prototype = Father.prototype
+      
+      Son.prototype.sum = function() {
+        console.log('求和');
+      }
+      
+      var son = new Son()
+      console.log(son);
+      
+      var fa = new Father()
+      console.log(fa);
+      ```
+
+    + 这样子继承方法才是正确的：
+    
+      ```js
+      function Father() {
+        
+      }
+      Father.prototype.exam = function() {
+        console.log('考试');
+      }
+      
+      
+      function Son() {
+      }
+      
+      // 继承父构造函数的方法：把父构造函数的实例对象赋值给子构造函数的原型对象。
+      // 因为父构造函数的实例对象和父构造函数的原型对象是不同的对象，不会父构造函数的实例对象一修改就
+      // 修改父构造函数的原型对象。那么就可以自由对子构造函数的原型对象做修改。
+      
+      // 之所以可以访问构造函数的原型对象的原理是：如果一个对象有这个方法就直接访问这个方法。如果一个对象没有这个
+      // 方法，那么只要这个对象有一个_proto__属性，这个属性值是一个对象，对象里有这个方法就可以直接访问。
+      // 因此，父构造函数的实例对象有一个__proto__属性，这个属性指向父构造函数的原型对象。当实例化一个子构造函数的
+      // 实例对象，它有一个__proto__属性指向子构造函数的原型对象，子构造函数的原型对象是父构造函数的实例对象，
+      // 可以通过__proto__属性访问到父构造函数的原型对象的方法，这样子就实现了方法的继承。
+      Son.prototype = new Father()
+      // 一定要把子构造函数的原型对象的constructor属性指向子构造函数。
+      Son.prototype.constructor = Son
+      
+      
+      var son = new Son()
+      son.exam() // 考试
+      ```
+    
+      
+
+### （类）和（构造函数，原型对象）的对比
+
++ 相同点：
+  + 两者都可以实例出对象，实例对象同样具有属性和方法。
++ 不同点：
+  + 类的属性和方法都是放在一个花括号里的，可以理解为是放在一个整体的。
+  + 构造函数和原型对象，属性放在构造函数里定义，方法放在原型对象。感觉比较松散。
+
+### 对象的方法
+
++ `Object.keys(对象)`
+
+  + 把对象的属性名都放入一个数组里，相当于存入一个变量中，以后如果要使用可以直接遍历。
+
+  + 使用for in也可以实现这种效果，但是比较麻烦。
+
+  + Object是一个构造函数名，keys是构造函数的一个方法，属于静态成员。
+
+    ```js
+      var obj = {
+        uname: '胡鹭斌',
+        id: 1,
+        sex: '男'
+      }
+    
+      var arr = Object.keys(obj)
+      console.log(arr);  // ['uname', 'id', 'sex']
+    ```
+
++ `Object.defineProperty(哪个对象，对象属性，特性)`
+
+  + 用来定义或者修改对象的属性。
+
+  + 特性：
+
+    1. value
+    2. writable
+    3. enumerable
+    4. configurable
+
+  + 使用传统方式修改或定义对象属性
+
+    ```js
+     var obj = {
+        id: 1,
+        pname: '苹果',
+        price: 9999
+       
+      }
+    
+      // 修改或者增加对象的属性有两种方式：
+    
+      // 1. 第一种比较简单，且不能设置对象属性的特性
+      // 增加对象属性
+      obj.num = 888
+    
+      // 修改对象属性
+      obj.num = 777
+    
+      // 删除对象属性
+      delete obj.num
+    ```
+
+  + 使用对象的方法修改或者定义对象属性（更全面，可以定义属性的特性）
+
+    ```js
+    
+      var obj = {
+        id: 1,
+        pname: '苹果',
+        price: 9999
+       
+      }
+      
+      
+    
+      Object.defineProperty(obj, 'price', {
+        // 特性1，修改属性的值。不写默认undefined。通过这个方法新增加的属性，不写默认是undefined。如果不是通过这个方法增加的属性，特性不写则默认为原来的值
+        value: 1000
+      })
+      console.log(obj); // {id: 1, pname: '苹果', price: 1000}
+    
+    
+    
+      Object.defineProperty(obj, 'num', {
+        value: 888,
+        // 特性2，是否允许对象属性被修改。通过这个方法新增加的属性，不写默认是false。如果不是通过这个方法增加的属性，特性不写则默认为true
+        writable: false,
+        enumerable: true
+      })
+      obj.num = 777
+      console.log(obj); // {id: 1, pname: '苹果', price: 1000, num: 888}
+    
+    
+    
+      Object.defineProperty(obj, 'pname', {
+        // 特性3，这个属性是否可以被遍历出来。通过这个方法新增加的属性，不写默认是false。如果不是通过这个方法增加的属性，特性不写则默认为true
+        enumerable: false
+      })
+      var arr = Object.keys(obj)
+      // pname这个属性没有被遍历出来
+      console.log(arr); // ['id', 'price', 'num']
+    
+      for(var k in obj) {
+        console.log(k); // pname同样没有被遍历出来
+      }
+    
+    
+    
+      Object.defineProperty(obj, 'id', {
+        writable:false,
+        // 特性4，这个属性能否被删除或者特性还能否被修改。
+        configurable: false
+      })
+      delete obj.id
+      // 删除不了这个属性
+      console.log(obj); // {id: 1, price: 1000, num: 888, pname: '苹果'}
+    
+      // 由于这个属性上面已经设置configurable: false，接下来这个属性的特性不能再次被修改，否则报错。
+      Object.defineProperty(obj, 'id', {
+        writable:true,
+        configurable: true
+      })
+    
+     
+    ```
+
+### 函数进阶
+
++ 函数的定义方式
+
+  ```js
+    // 1. 命名函数
+    function fn() {
+  
+    }
+    fn()
+  
+  
+    // 2. 函数表达式(匿名函数)
+    var fn1 = function() {
+  
+    }
+    fn1()
+  
+  
+    // 3. Function构造函数的形式  new Function('参数1', '参数2', ..., '函数体')
+    var fn2 = new Function('a', 'b', 'console.log(a + b)')
+    fn2(1, 2) // 3
+  
+    // 总结：
+    // Function里面的参数是以字符串的形式
+    // 第三种方式了解即可，执行效率低，比较少用
+    // 所有的函数都是Function构造函数的实例对象
+  
+  ```
+
+  ![image-20220222185133090](img/image-20220222185133090.png)
+
++ 函数的调用
+
+  ```js
+  //  1. 普通函数
+  function fn1() {
+    console.log(123);
+  }
+  fn1()
+  fn1.call()
+  
+  // 2. 对象的方法
+  var obj = {
+    fn2: function() {
+      console.log(456);
+    }
+  }
+  obj.fn2()
+  
+  // 3. 构造函数
+  function Star() {
+    console.log(789);
+  }
+  // 通过new调用构造函数
+  new Star()
+  
+  // 4. 绑定事件的函数
+  btn.onclick = function() {
+    console.log(111);
+  }
+  // 按钮点击时被调用
+  
+  // 5. 定时器函数
+  setInterval(function() {
+    console.log(444);
+  }, 1000)
+  // 每隔一秒调用一次
+  
+  // 6.立即执行函数
+  (function() {
+    console.log(666);
+  })()
+  // 会立即执行自己调用
+  
+  
+  ```
+
++ 函数内部的this指向，详细看C:\html+css笔记里的文件。
+
++ 改变函数内部的this指向
+
+  + `call(对象，参数1, 参数2, ...)`
+
+    1. 调用函数。
+    2. 改变函数内部的this指向。
+    3. 应用：主要用来做子构造函数继承父构造函数的属性。
+
+    ```js
+      var o = {
+        uname: 'andy'
+      }
+    
+    function fn() {
+      console.log(this);
+    }
+    
+    function fn1(a, b) {
+      console.log(a+b);
+    }
+    
+    fn.call() // window， 在全局作用域下定义的函数，是被添加为window的方法的，所以是被window调用。
+    fn.call(o) // 改变函数内部的this指向为o对象
+    fn1.call(o, 1, 2)  // 3， 还可以传递实参
+    
+    
+    ```
+
+  + `apply(对象, 数组)`
+
+    1. 调用函数。
+    2. 改变函数内部的this指向。
+    3. 应用：可以利用`Math.max()`求出数组的最大值。
+
+    ```js
+      var o = {
+        uname: 'andy'
+      }
+    
+    function fn1() {
+      console.log(this);
+    }
+    
+    function fn2(a, b) {
+      console.log(a + b);
+    }
+    // 调用函数并改变函数内部的this指向
+    fn1.apply(o) // {uname: 'andy'}
+    
+    // 保持原来的window指向，第二个参数是数组
+    fn2.apply(window, [1, 2]) // 3
+    
+    console.log(Math.max([55, 66, 1])); // NaN
+    console.log(Math.max(55, 66, 1)); // 66
+    
+    
+    // 可以使用apply这个方法，来求数组中的最大值。因为第二个参数必须是数组，在调用函数执行时，会把数组变为单个的参数。
+    // 比如[55, 66, 100]会变为55, 66, 100的形式传入被调用的函数。
+    // 巧妙运用apply传入参数的特性可以通过Math.max()方法求出数组中的最大值
+    var arr = [55, 66, 100]
+    console.log(Math.max.apply(Math, arr)); // 100
+    ```
+
+  + `bind(对象, 参数1, 参数2, ...)`
+
+    1. 不可以调用函数。
+    2. 有返回值，返回值为原来函数的拷贝，且是已经改变了this指向的拷贝函数。
+    3. 原来的函数的this仍然没变。
+    3. 实际开发中`bind`用的比较多。
+    3. 应用：某个函数不需要立即调用，但是又想改变函数内部this指向。
+    
+    ```js
+      var o = {
+        uname: 'andy'
+      }
+    
+    function fn1() {
+      console.log(this);
+    }
+    
+    // 1. 不会调用函数
+    // 2. 可以改变原来函数里的this。但是会返回一个原来的函数的拷贝函数，且这个拷贝函数的this已经被修改了。
+    var f = fn1.bind(o)
+    fn1() // window
+    f() // {uname: 'andy'}
+    
+    // 3. 可以传递参数
+    function fn2(a, b) {
+      console.log(a + b);
+    }
+    
+    var f2 = fn2.bind(o, 1, 2)
+    f2() // 3
+     
+    
+    ```
+    
+    `bind`的灵活应用例子
+    
+    ```html
+    <body>
+      <button>按钮1</button>
+      <button>按钮2</button>
+      <button>按钮3</button>
+     
+    </body>
+    <script>
+      var btns = document.querySelectorAll('button')
+      for(var i = 0; i < btns.length; i++) {
+        btns[i].onclick = function() {
+          this.disabled = true
+          setTimeout(function() {
+            // 定时器里的this是window
+            // 但是也不可以使用如下的代码，三秒之后会报错。因为代码从上往下执行的时候for循环会先执行且一下子就执行完了
+            // 当你点击按钮执行事件处理函数的代码时，i已经变成3了，成为btns[3],明显没有这个按钮就会报错。
+            // 如果使用this代替btns[i]，但是this是指向window。此时可以通过函数的方法bind改变this指向。
+            // 为什么不用call和apply方法呢，因为两个方法都会调用函数，明显我们并不想马上调用函数，而是要定时器三秒之后调用
+    
+            // btns[i].disabled = false
+    
+            this.disabled = false
+          }.bind(this), 3000)
+        }
+      }
+    
+    </script>
+    ```
+    
+    ![image-20220223165304509](img/image-20220223165304509.png)
+
+
+
+### 严格模式
+
++ 什么是严格模式
+
+  ![image-20220223165921952](img/image-20220223165921952.png)
+
++ 开启严格模式
+
+  1. 为脚本开启严格模式
+
+     ```js
+      // 为脚本开启严格模式
+      'use strict'
+       //  下面的代码都将是按照严格模式执行
+     ```
+
+     为了防止如果有多个脚本合并时有的是严格模式有的是普通模式，可以先用立即执行函数创造出独立的局部作用域，在里面开启严格模式，那么就不会影响到别的脚本文件的模式。
+
+     ```js
+     
+       (function() {
+         // 为脚本开启严格模式
+         'use strict'
+          //  下面的代码都将是按照严格模式执行
+       })()
+      
+     ```
+
+  2. 为函数开启严格模式
+
+     ```js
+     function fn() {
+         'use strict'
+         // 下面的代码都将按照严格模式执行
+       }
+     ```
+
++ 严格模式下的变化
+
+  + 变量规定
+
+    + 普通模式下，变量没有声明直接赋值则是全局变量。
+
+      ```js
+      num = 10
+      console.log(num); // 10
+      ```
+
+    + 严格模式下，变量必须先声明再使用。
+
+      ```js
+        'use strict'
+        num = 10
+        console.log(num); // 报错
+      ```
+
+    + 普通模式下，已经声明的变量可以删除。
+
+      ```js
+       var num = 10
+        delete num
+      ```
+
+    + 严格模式下，已经声明的变量不可以删除。
+
+      ```js
+      'use strict'
+        var num = 10
+        delete num // 报错
+      ```
+
+  + 函数内部this指向问题
+
+    + 普通模式下，全局作用域定义的函数默认是window对象的一个方法，所以再调用函数时是window调用的，this指向window。
+
+      ```js
+       function fn() {
+          console.log(this);
+        }
+        fn() // window
+      ```
+
+    + 严格模式下，全局作用域定义的函数的this指向是undefined。但是这个函数仍然是window对象的一个方法。
+
+      ```js
+        'use strict'
+        function fn() {
+          console.log(this);
+        }
+        fn() // undefined
+      ```
+
+    + 普通模式下，构造函数如果不使用new关键字调用，则可以当做普通函数调用，由于是在全局作用域下定义的，this仍然指向window，所以不会报错。
+
+      ```js
+       function Star() {
+          this.sex = '男' 
+        }
+        Star() 
+        console.log(window.sex); // 男
+      ```
+
+    + 严格模式下，构造函数当做普通函数调用，那么this就是指向undefined，不能给undefined添加属性，会报错。
+
+      ```js
+       'use strict'
+        function Star() {
+          this.sex = '男' 
+        }
+        Star() // 报错
+      ```
+
+    > 总结：严格模式下的this指向，除了全局作用域下定义的函数的this指向与普通模式不一样之外，其余情况的this指向都不变。
+
+  + 函数的变化
+
+    + 普通模式下，函数形式参数可以重名（但是不会这样子写的）。
+    + 严格模式下，不允许函数参数重名。
+    + 严格模式下，函数的声明不能写在块级作用域（即if的花括号里，for的花括号里等非函数作用域里）。
+
+### 高阶函数
+
+> ```js
+>  var num = 10
+> 
+>   // 这句话表示，如果num存在，那么就打印
+>   num && console.log(num);
+> ```
+>
+> 
+
++ 高阶函数是对其他函数进行操作的函数，它接受函数作为参数或将函数作为返回值。
+
+  + 因为函数也是一个对象，是一种数据类型。
+
+  + 典型的高阶函数就是一个参数里有回调函数的函数，如定时器，forEach等等。
+
+    ```js
+      // 1. 把函数作为参数
+      function fn(a, b, callback) {
+        console.log(a + b);
+        callback && callback()
+      }
+    
+      // 高阶函数的调用
+      fn(1, 2, function() {
+        console.log('我是回调函数');
+      })  
+    
+    
+    
+      // 2. 把函数作为返回值
+      function fun() {
+        return function() {
+          console.log('我被作为返回值');
+        }
+      }
+      var func = fun()
+      func() // 我被作为返回值
+     
+    ```
+
+### 闭包(closure)
+
++ 变量作用域
+
+  + 变量分为全局变量和局部变量。
+  + 函数内部可以使用全局变量。
+  + 函数外部不可以使用局部变量。
+  + 当函数执行完毕，本作用域内的局部变量会被销毁。
+
++ 什么是闭包
+
+  + **一个作用域能够访问另一个函数内部的局部变量**，被访问的变量所处的函数就是闭包，==闭包是一个函数==。
+
+    > 闭包的原理就是子函数可以访问父函数的局部变量。一个函数内的变量如果被使用完了会被立即销毁，如果没有被使用完了是不会被销毁的，会保存着，直到被使用完毕。使用var定义变量，只有函数会产生局部作用域。要书写闭包就要函数嵌套函数。
+
+    闭包1
+
+    ```js
+      function fn() {
+        var num = 10
+        function fun() {
+          console.log(num);
+        }
+        fun()
+      }
+    
+      // 全局作用域和与fn函数并列的函数的局部作用域是无法访问fn内部的局部变量的。
+      // 但是fun是在fn函数里头，那么num就相当于fun里的全局变量，所以可以访问得到num。
+      // 一旦形成一个作用域可以访问另一个函数作用域里的局部变量,就会形成闭包,闭包就是被访问的变量所处的函数.
+      // 所以,fn函数是闭包。闭包是一个函数。
+      fn() // 10
+    ```
+
+    闭包2
+
+    ```js
+      // 也可以在全局作用域中访问函数局部作用域内的局部变量。
+      // function fn() {
+      //   var num = 10
+      //   function fun() {
+      //     console.log(num);
+      //   }
+      //   return fun
+      // }
+    
+      // var f = fn()
+      // f() // 10
+    
+      // 上面的写法直接返回一个匿名函数即可，更简便。fn就是一个闭包。且这个闭包是一个高阶函数。
+      function fn() {
+        var num = 10
+        return function() {
+          return num
+        }
+      }
+    
+      var f = fn()
+      console.log(f()); // 10
+    
+     
+    ```
+
++ 闭包的作用
+
+  + 正常情况下，函数作用域内的局部变量只能在同一个作用域内局部使用，使用完了就会被销毁。但是使用闭包，可以让函数内的局部变量在其他作用域被使用，等所有的作用域都使用完了才会被销毁。因此，闭包的作用就是，==延伸了变量的作用范围==。
+
++ 闭包的应用
+
+  + 应用场景：不让函数一调用完毕就把变量给销毁了，延伸变量的作用范围。只有当闭包里的变量被使用完毕才会被销毁。但是如果一直没有用的话就会一直保存在内存中，造成内存泄露。有好有坏。
+  + 立即执行函数又叫小闭包，经常使用它来形成函数嵌套函数。
+
+  1. 经典面试题（请使用闭包的形式点击小li，输出小li的索引）
+
+     ```html
+     <body>
+       <ul>
+         <li>北京</li>
+         <li>上海</li>
+         <li>厦门</li>
+         <li>漳州</li>
+       </ul>
+     </body>
+     <script>
+       // 方法1，使用自定义属性的做法给li元素设置索引值并保存着
+       // var lis = document.querySelectorAll('li')
+       // for(var i = 0; i < lis.length; i++) {
+       //   lis[i].setAttribute('index', i)
+       //   lis[i].onclick = function() {
+       //     console.log(this.getAttribute('index'));
+       //   }
+       // }
+     
+     
+       // 方法2，使用闭包的形式，延长函数内部的变量的作用范围，不要函数一调用就被立即销毁，先保存着，等闭包内的
+       // 变量被使用完毕才销毁。
+       var lis = document.querySelectorAll('li')
+       for(var i = 0; i < lis.length; i++) {
+         // 使用立即函数是为了函数嵌套函数，形成闭包，把立即执行函数里的变量给保存着。
+         (function(i) {
+           lis[i].onclick = function() {
+             console.log(i);
+           }
+         })(i) // 这里是实参
+     
+       }
+     
+       
+      
+     </script>
+     ```
+
+  2. 使用闭包，依次输出li里面的内容。
+
+     ```html
+       <style>
+         * {
+           margin: 0;
+           padding: 0;
+         }
+        
+       </style>
+     </head>
+     <body>
+       <ul>
+         <li>北京</li>
+         <li>上海</li>
+         <li>厦门</li>
+         <li>漳州</li>
+       </ul>
+     </body>
+     <script>
+      
+       var lis = document.querySelectorAll('li')
+       for(var i = 0; i < lis.length; i++) {
+         (function(i) {
+     
+           setTimeout(function() {
+           console.log(lis[i].innerHTML);
+         }, i * 1000)
+     
+         })(i)
+         
+       }
+       
+     </script>
+     ```
+
+  3. ```js
+       // 计算打车的价格：起步价13元（三公里内 含），超出3公里每公里5元。
+       // 如果有拥堵再加10元。
+        
+       // 有时候为了独立出一个局部作用域，要在这个作用域里实现某个功能，既可以防止变量命名冲突，又可以使代码逻辑清晰。
+       var car = (function() {
+         // 在局部作用域里声明变量，可以放心使用，不用怕和全局作用域变量冲突。
+         var start = 13
+         var total = 0
+         // 最后return出来是因为为了这个值能够全局使用。
+         return {
+           nomalPrice: function(n) {
+             if(n > 3) {
+               total = (n - 3) *5 + start
+             } else {
+               total = start
+             }
+             return total
+           },
+           ydPrice: function(flag) {
+             return flag ? total + 10 : total
+           }
+         }
+       })()
+        
+       console.log(car.nomalPrice(5)); // 23
+       console.log(car.ydPrice(true)); // 33
+
+
+  ​    
+
+     ```
+
++ 思考题
+
+  + ![image-20220224150843132](img/image-20220224150843132.png)
+  + ![image-20220224151025487](img/image-20220224151025487.png)
+
+### 递归
+
++ 什么是递归
+
+  + 如果一个函数在内部可以调用其本身，那么这个函数就是==递归函数==。
+  + 递归函数的作用和循环效果一样，都是重复执行某段代码。
+  + 递归很容易发生栈溢出错误，所以必须加退出条件，通过==return==退出。
+
+  ```js
+   // 使用for循环实现的效果，也可以通过递归实现
+    // for(var i = 1; i <= 6; i++ ) {
+    //   console.log(i);
+    // }
+  
+  
+      // 递归函数
+    var i = 1
+    function fn() {
+      console.log(i);
+      if(i == 6) {
+        return 
+      }
+      i++
+      fn()
+    }
+  
+    fn()
+  ```
+
++ 递归案例：
+
+  ```js
+  // 利用递归实现1 * 2 * 3 * ....n的阶乘
+    function fn(n) {
+      if(n <= 0) {
+        alert('输入大于0的数')
+        return
+      }
+      if(n == 1) {
+        return 1
+      }
+      return n * fn(n - 1)
+    }
+  
+    console.log(fn(4));
+  ```
+
+  一般是想不出来的，了解即可，不要纠结
+
+  ```js
+    // 利用递归求斐波拉契数列（兔子序列）：前两个数的和等于后面一个1、1、2、3、5、8、13、21、、、、
+    // 用户输入某个位置就可以得到对应的序列值，如输入4就可以得到3
+    function fn(i) {
+  
+      if(i === 1 || i === 2) {
+        return 1
+      }
+      return fn(i - 1) + fn(i - 2) 
+    
+    }
+    
+    console.log(fn(6)); // 8
+  ```
+
+  利用递归遍历有多层的数组或对象，减少了代码量。==同时，如果不知道数组或者对象到底有多少层，也只能使用递归函数。==
+
+  ```js
+    var json = [
+      {
+        id: 1,
+        gclass: '服装',
+        goods: [
+          {
+            id: 10,
+            gname: 'ANB'
+          },
+          {
+            id: 2,
+            gname: 'thisneverthat'
+          },
+          {
+            id: 15,
+            gname: 'MujiLabo'
+          }
+        ]
+      },
+      {
+        id: 2,
+        gclass: '鞋子'
+      }
+    ]
+  
+    function getItemById(json, id) {
+      json.forEach(function(value, index) {
+        if(value.id == id) {
+          console.log(value);
+          
+        }
+        if(value.goods && value.goods.length > 0) {
+            // 使用递归，再次调用自己遍历一次，省的再写一次数组的遍历
+            // 不然正常情况下数组只会遍历最外层的元素
+            getItemById(value.goods, id)
+        }
+  
+      })
+  
+    }
+  
+    getItemById(json, 2)
+  
+   // 如果不使用递归，就会增加代码量
+    // function getItemById(json, id) {
+    //   json.forEach(function(value, index) {
+    //     if(value.id == id) {
+    //       console.log(value);
+    //     }
+    //     if(value.goods && value.goods.length > 0) {
+    //       value.goods.forEach(function(value) {
+    //         if(value.id == id) {
+    //       console.log(value);
+    //     }
+    //       })
+    //     }
+    //   })
+  
+    // }
+  
+    //   getItemById(json, 2)
+  ```
+
+### 浅拷贝和深拷贝
+
++ 为什么要拷贝对象？
+
+  + 因为对象如果用赋值的方式去复制，只是赋值引用。引用是存在栈中的，而对象的数据是存在堆中的。当赋值引用时，两个变量就同时指向同一个堆中的对象，当改变任何一个变量中的属性值，另一个对象也会跟着被改变。所以不能用赋值的方式去复制对象。要用拷贝的方式。
+
++ 浅拷贝：只拷贝==一层==，更深层次的==对象级别的只拷贝引用==。
+
+  + 浅拷贝的实现方式1（通过遍历的形式）
+
+    ```js
+     // 对象的浅拷贝  
+    var obj = {
+          id: 1,
+          uname: '胡鹭斌',
+          age: 26
+        }
+    
+        var o = {}
+    
+        // 遍历对象
+        for(var k in obj) {
+          o[k] = obj[k]
+        }
+    
+        o.id = 6
+        console.log(o); // {id: 6, uname: '胡鹭斌', age: 26}
+        // 已经实现了浅拷贝，所以o和obj是两个不同的对象
+        console.log(obj); // {id: 1, uname: '胡鹭斌', age: 26}
+    
+    
+    // 数组的浅拷贝
+        var arr = ['red', 'blue', 'pink', 'yellow']
+    
+        var a = []
+    
+        arr.forEach(function(value) {
+          a.push(value)
+        })
+    
+        a[0] = 'black'
+        console.log(a); // ['black', 'blue', 'pink', 'yellow']
+        console.log(arr); // ['red', 'blue', 'pink', 'yellow']
+    ```
+
+  + 浅拷贝的方式2（语法糖的形式）
+
+    > 什么是语法糖：就是使用更简单的写法实现一个功能，比如是一个方法。还比如`i+=1`就是`i=i+1`的语法糖。
+
+    ```js
+    // 对象浅拷贝的语法糖   
+    var obj = {
+          id: 1,
+          uname: '胡鹭斌',
+          age: 26
+        }
+    
+        var o = {}
+    
+        // 浅拷贝的语法糖：Object.assign(target, source)
+        // 把obj拷贝到o
+        Object.assign(o, obj)
+        console.log(o); // {id: 1, uname: '胡鹭斌', age: 26}
+    
+    // 数组浅拷贝的语法糖
+        var arr = ['red', 'blue', 'pink', 'yellow']
+    
+        var a = []
+    
+        Object.assign(a, arr)
+    
+        a[0] = 'black'
+        console.log(a); // ['black', 'blue', 'pink', 'yellow']
+        console.log(arr); // ['red', 'blue', 'pink', 'yellow']
+    ```
+
+    + 浅拷贝的缺点：更深层次的对象级别的只拷贝引用，如果修改更深层次的对象，会同时改变两个深层次的对象。
+
+    ```js
+        var obj = {
+          id: 1,
+          uname: '胡鹭斌',
+          age: 26,
+          msg: {
+            sex: '男'
+          }
+        }
+    
+        var o = {}
+    
+        // 浅拷贝只拷贝一层
+        Object.assign(o, obj)
+        o.msg.sex = '女'
+        console.log(o.msg.sex); // 女
+        console.log(obj.msg.sex); // 女
+    ```
+
++ 深拷贝：拷贝多层，每一级别的数据都会拷贝对应的数据，而非引用。
+
+  + 使用递归函数，可以实现对象或者数组的多重遍历，达到深拷贝的效果。
+
+    ```js
+        var obj = {
+          id: 1,
+          uname: '胡鹭斌',
+          age: 26,
+          msg: {
+            sex: '男'
+          },
+          color: ['pink', 'red', 'blue']
+        }
+    
+        // var obj = [{id: 1, sex: '男'}, 'hu']
+    
+        if(obj instanceof Array) {
+          var o = []
+        } else {
+          var o = {}
+        }
+        
+    
+       function deepCopy(newObj, oldObj) {
+    
+        // for in既可以遍历数组也可以遍历对象
+        for(var k in oldObj) {
+          // 判断对象第一层的属性值或者数组第一层的元素是什么数据类型
+          var item = oldObj[k]
+          // 一定要把判断数组类型放在上面，因为数组类型也是Object
+          if(item instanceof Array) {
+            newObj[k] = []
+            deepCopy(newObj[k], item)
+          }else if(item instanceof Object) {
+            newObj[k] = {}
+            deepCopy(newObj[k], item)
+          } else{
+            newObj[k] = item
+          }
+        }
+       }
+    
+      
+       deepCopy(o, obj)
+      //  实现了深拷贝，无论怎么深层次修改o这个数据，都不会影响obj
+       console.log(o);
+       
+    
+    ```
+
+    > `instanceof`：关键字，可以判断一个数据是数组类型还是对象类型。如果数组和对象同时判断，记得先判断数组。
+    >
+    > ```js
+    > var arr = [1, 2 ,3]
+    > var obj = {id: 1}
+    > console.log(arr instanceof Array); // true
+    > console.log(arr instanceof Object); // true
+    > console.log(obj instanceof Array); // false
+    >     
+    > ```
+    >
+
+### 正则表达式
+
++ 什么是正则表达式？
+
+  + 正则表达式（Regular Expression）是用于匹配字符串中字符组合的模式。
+  + 在js中，正则表达式也是对象。
+  + 作用：匹配，替换，提取。
+
++ 创建正则表达式对象
+
+  ```js
+    // 通过RegExp构造函数创建
+    var reg = new RegExp(/123/)
+    console.log(reg);
+    
+    // 通过字面量创建
+    var reg1 = /456/
+  
+  ```
+
+  > 正则表达式里不需要加引号，不论是数字型还是字符串型。
+
++ 正则表达式对象的`test`方法，返回值为布尔型。
+
+  ```js
+   // 通过字面量创建正则表达式对象
+    var reg = /123/
+  
+    // 既然是对象就有方法，test方法是测试字符串是否符合正则表达式的规范。
+    console.log(reg.test('123')); // true
+  ```
+
++ 字符串的`replace`方法：`str.replace(string/RegExp, 替换成什么)`。会返回被替换后的新字符串。
+
+  ```js
+    // 字符串的写法
+    var str1 = 'andy和sunny与andy'
+    var newStr1 = str1.replace('andy', 'baby')
+    console.log(newStr1); // 'baby和sunny与andy'，只替换第一个
+  
+  
+    // 正则表达式的写法
+    var str2 = '激情乔丹和科比,激情吗，你是gay吗，是gay'
+    // 注意正则表达式里不能加引号，且在替换时也不要加边界符^$。
+    // 加g是全局匹配，i是忽略大小写，gi是既忽略大小写又全局匹配
+    // 要匹配多个词汇就用|
+    var newStr2 = str2.replace(/激情|gay/g, '**')
+    console.log(newStr2); // **乔丹和科比,**吗，你是**吗，是**
+  
+  ```
+
+  
+
++ 正则表达式中的特殊字符
+
+  + 正则表达式里的普通字符在被检测的字符串就是那个字符。但是也有特殊字符表示特殊意义。
+
+  + `^`：以什么开头。`$`：以什么结尾。`^`和`$`一起使用就是精确匹配。
+
+    ```js
+      // 表示字符串只要有abc就符合规范
+      var reg1 = /abc/
+      console.log(reg1.test('abc')); // true
+      console.log(reg1.test('adabc'));  // true
+      console.log(reg1.test('abckl'));  // true
+      console.log(reg1.test('addbckl'));  // false
+      console.log('-----------------------------------------------');
+    
+    
+      // 表示只要字符串以abc开头就符合规范
+      var reg2 = /^abc/
+      console.log(reg2.test('abc')); // true
+      console.log(reg2.test('abckl')); // true
+      console.log(reg2.test('kabckl')); // false
+      console.log('-----------------------------------------------');
+    
+    
+      // 表示字符串只要以abc结尾就符合规则
+      var reg3 = /abc$/
+      console.log(reg3.test('abc')); // true
+      console.log(reg3.test('klkabc')); // true
+      console.log(reg3.test('abcl')); // false
+      console.log('-----------------------------------------------');
+    
+    
+      // 表示字符串只能是abc，不能多也不能少。
+      var reg4 = /^abc$/
+      console.log(reg4.test('abc')); // true
+      console.log(reg4.test('abcabc')); // false
+      console.log(reg4.test('kabc')); // false
+      console.log(reg4.test('kabckl')); // false
+    
+    ```
+
+  + `[]`：字符类，表示一系列字符可供选择，只要选择其中一个。也就是说，这个写法最终的结果就是一个字符占位。如`[abc]`，最后只能选一个占位，即要么是`a`，或者`b`，或者`c`。
+
+    ```js
+    // 这个式子，可以拆解为/a/或者/b/或者/c/，只要字符串有abc其中一个字符就符合规则。
+      var reg1 = /[abc]/
+      console.log(reg1.test('color')); // true
+      console.log(reg1.test('andy')); // true
+      console.log(reg1.test('bob')); // true
+      console.log(reg1.test('red')); // false
+      console.log('---------------------------------------------');
+    
+    
+      // 表示字符串只能是a或者b或者c
+      var reg2 = /^[abc]$/
+      console.log(reg2.test('a')); // true
+      console.log(reg2.test('b')); // true
+      console.log(reg2.test('c')); // true
+      console.log(reg2.test('abc')); // false
+      console.log(reg2.test('akl')); // false
+      console.log('---------------------------------------------');
+    
+      
+      var reg3 = /[469]/
+      console.log(reg3.test('456')); // true
+      console.log(reg3.test('9')); // true
+      console.log('---------------------------------------------');
+    ```
+
+    `[-]`表示范围。
+
+    ```js
+    // 明显只要[]内写几个字符，就是从中挑一个。但是如果需要26个英文字符就需要写26个，那太麻烦了。
+      // 可以用 - 表示范围
+      // 表示a到z的26个小写英文字母。
+      var reg4 = /^[a-z]$/
+      console.log(reg4.test('a')); // true
+      console.log(reg4.test('z')); // true
+      console.log(reg4.test('g')); // true
+      console.log(reg4.test('G')); // false
+      console.log('---------------------------------------------');
+    
+    
+      // 表示26个大写字母中的一个
+      var reg5 = /^[A-Z]$/
+      console.log(reg5.test('A')); // true
+      console.log(reg5.test('a')); // false
+      console.log(reg5.test('Z')); // true
+      console.log('---------------------------------------------');
+    
+    
+      // 表示0到9数字的一个
+      var reg6 = /^[0-9]$/
+      console.log(reg6.test(9)); // true
+      console.log(reg6.test('1')); // true
+    ```
+
+    `[]`里面的字符组合。
+
+    ```js
+     // 表示字符串只要是所有大小写字母中的一个或者0到9数字中的一个或者是-字符或者是_字符就符合规范。
+      var reg = /^[a-zA-Z0-9_-]$/
+      console.log(reg.test('a')); // true
+      console.log(reg.test('Z')); // true
+      console.log(reg.test('5')); // true
+      console.log(reg.test('-')); // true
+      console.log(reg.test('_')); // true
+      console.log(reg.test('!')); // false
+    
+    ```
+
+    `[]`里的`^`表示取反，与`//`里的`^`不一样。
+
+    ```js
+      // 表示字符串只要不是所有大小写字母中的一个或者不是0到9数字中的一个或者不是-字符或者不是_字符就符合规范。
+      var reg = /^[^a-zA-Z0-9_-]$/
+      console.log(reg.test('a')); // false
+      console.log(reg.test('Z')); // false
+      console.log(reg.test('5')); // false
+      console.log(reg.test('-')); // false
+      console.log(reg.test('_')); // false
+      console.log(reg.test('!')); // true
+    ```
+
+  + 量词符：用来设定某个模式可以出现的次数。
+
+    `*`：可以出现0次或者多次，>=0。
+
+    ```js
+      var reg = /^a*$/
+      console.log(reg.test('')); // true
+      console.log(reg.test('a')); // true
+      console.log(reg.test('aaaa')); // true
+    ```
+
+    `+`：可以出现1次或者多次，>=1。
+
+    ```js
+    var reg = /^a+$/
+    console.log(reg.test('')); // false
+    console.log(reg.test('a')); // true
+    console.log(reg.test('aaaa')); // true
+    ```
+
+    `?`：可以出现1次或者0次，1 || 0。
+
+    ```js
+      var reg = /^a?$/
+      console.log(reg.test('')); // true
+      console.log(reg.test('a')); // true
+      console.log(reg.test('aaaa')); // false
+    ```
+
+    `{n}`：可以出现n次。
+
+    ```js
+     var reg = /^a{3}$/
+      console.log(reg.test('')); // false
+      console.log(reg.test('a')); // false
+      console.log(reg.test('aaaa')); // false
+      console.log(reg.test('aaa')); // true
+    
+    var reg1 = /^abc{3}$/   // 表示c重复三次。即'abccc'才是符合规范的
+    
+    var reg2 = /^(abc){3}$/  // 小括号表示优先级。即'abcabcabc'是正确的
+     
+    ```
+
+    `{n, }`：可以出现n次或者大于n次，>=n。
+
+    ```js
+      var reg = /^a{3,}$/
+      console.log(reg.test('')); // false
+      console.log(reg.test('a')); // false
+      console.log(reg.test('aaaa')); // true
+      console.log(reg.test('aaa')); // true
+    ```
+
+    `{n, m}`：可以出现n次到m次， >=n && <=m。
+
+    ```js
+      var reg = /^a{3,6}$/
+      console.log(reg.test('')); // false
+      console.log(reg.test('a')); // false
+      console.log(reg.test('aaaa')); // true
+      console.log(reg.test('aaa')); // true
+      console.log(reg.test('aaaaaaa')); // false
+    ```
+
+    上面的例子只是单个字符搭配量词符。正常是模式搭配量词符。
+
+    ```js
+      // 表示[a-zA-Z0-9_-]这个模式出现次数为6到16次。
+      var reg = /^[a-zA-Z0-9_-]{6,16}$/
+      console.log(reg.test('sd53fd-')); // true
+      console.log(reg.test('sd53f_d-')); // true
+      console.log(reg.test('s!53f_d-')); // false
+      console.log(reg.test('s-')); // false
+     
+    ```
+
+    
+
+    > 注意：使用量词符时，中间不能有空格。如`{3, 6}`是错的，要`{3,6}`才是正确。
+
+  + 预定义类：是字符类`[]`的某些模式的简写，因此，也是表示==多个中取一个==。
+
+    ![image-20220225175734163](img/image-20220225175734163.png)
+
+  + 正则表达式的或是`|`。
+
+    验证全国座机号码案例：
+
+    ```js
+      // 010-12345678  或者 0530-1234567
+      // 写法一
+      var reg = /^\d{3}-\d{8}|\d{4}-\d{7}$/
+    
+      // 写法二
+      var reg2 = /^\d{3,4}-\d{7,8}$/
+    ```
+
+    
+
++ 正则表达式做表单验证案例
+
+  ```html
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      .wrong {
+        color: red;
+      }
+      .right {
+        color: green;
+      }
+      
+    </style>
+  </head>
+  <body>
+    <input type="text">
+    <span>请输入用户名</span>
+  </body>
+  <script>
+    var inp = document.querySelector('input')
+    var sp = document.querySelector('span')
+  
+    // 先顶一个正则表达式规则，通过这个规则去判断字符串是否符合格式。
+    var reg = /^[a-zA-Z0-9-_]{6,16}$/
+  
+    inp.addEventListener('blur', function() {
+      var content = inp.value.trim()
+      if(content) {
+        if(reg.test(content)) {
+          sp.className = 'right'
+          sp.innerHTML = '格式正确'
+        }else {
+          sp.className = 'wrong'
+          sp.innerHTML = '格式不正确'
+        }
+  
+      }else {
+        sp.innerHTML = '内容为空'
+        sp.className = 'wrong'
+      }
+    })
+  
+  </script>
+  ```
+
+### ES6
+
+#### 变量let
+
+> 1. 什么是块级作用域？就是大括号里面的就是块级作用域，比如`if(){}`，`for(){}`。ES6之前只有函数的大括号里的局部作用域和全局作用域。
+>
+> 2. 为什么需要局部作用域，或者说为什么需要块级作用域？为什么说可以防止变量的命名冲突？归根结底就是防止块级作用域变量覆盖全局作用域变量。
+
++ `let`
+
+  + 是声明变量的关键字
+
+  + 使用`let`声明的变量==具有块级作用域==。使用`var`声明的变量只有函数的局部作用域和全局作用域。
+
+    ```js
+      if(true) {
+        let a = 10
+        var b = 20
+        console.log(a); // 10
+        console.log(b); // 20
+      }
+      console.log(a); // 访问不到
+      console.log(b); // 20
+    ```
+
+  + 使用`let`关键字做`for`循环，可以==防止类似于`i`变成全局变量==。
+
+    如果使用`var`声明变量
+
+    ```js
+      // 使用var声明的变量不具备块级作用域，会变成全局变量。
+      for(var i = 0; i < 2; i++) {
+    
+      }
+      // 当循环结束i就不应该是全局变量，会有覆盖名字相同的全局变量的风险。
+      console.log(i); // 2
+    ```
+
+    使用`let`声明变量
+
+    ```js
+     // 使用let声明的变量具备块级作用域，不会成为全局变量，是局部变量。
+      for(let i = 0; i < 2; i++) {
+    
+      }
+      // 当循环结束i始终是局部变量，不会污染全局变量，防止覆盖同名的全局变量。
+      console.log(i); // 报错
+    ```
+
+  + 使用`let`声明变量==不存在==变量提升，即要先声明才可以使用。`var`声明变量存在变量提升。
+
+    `var`声明变量
+
+    ```js
+      console.log(num) // undefined，表示已经声明，没有赋值操作。
+      var num = 10
+    
+      // 上面的代码是如下运行的
+      // 先变量提升
+      var num
+      console.log(num)
+      // 在原地赋值
+      num = 10
+    ```
+
+    `let`声明变量
+
+    ```js
+      console.log(num) // 报错，因为不存在变量提升
+      let num = 10
+    ```
+
+  + 使用`let`声明的变量具有暂时性死区：就是使用`let`声明的变量已经和块级作用域绑定。
+
+    ```js
+     var num = 10
+      if(true) {
+        num = 20  // 会报错，因为会有暂时性死区，num这个变量已经属于这个块级作用域了。没有声明就使用会报错。
+        let num
+      }
+     
+    ```
+
+  > `let`面试题：
+  >
+  > 1. ```js
+  >     var arr = []
+  >      for(var i = 0; i < 2; i++) {
+  >        arr[i] = function() {
+  >          console.log(i);
+  >        }
+  >      }
+  >                    
+  >      arr[0]() // 2
+  >      arr[1]() // 2
+  >                    
+  >      // 上面的代码可以如下拆解:
+  >      // 假设用{}代表一次循环体
+  >      // 第一次循环
+  >      {
+  >                    
+  >        var i = 0
+  >        arr[0] = function() {
+  >          console.log(i);
+  >        }
+  >        i++
+  >                    
+  >      }
+  >    
+  >    
+  >      // 第二次循环
+  >      {
+  >                    
+  >        var i = 1 // i已经是1
+  >        arr[1] = function() {
+  >          console.log(i);
+  >        }
+  >        i++ //循环结束i是2
+  >                    
+  >      }
+  >                    
+  >      // 由于使用var声明变量没有块级作用域，i是全局作用域下的全局变量。
+  >      // 当循环结束调用函数，i是全局作用域的全局变量，且每次循环体的i都是同一个作用域下的变量，就会被覆盖。
+  >    
+  >    
+  >    ```
+  >
+  > 2. ```js
+  >     var arr = []
+  >      for(let i = 0; i < 2; i++) {
+  >        arr[i] = function() {
+  >          console.log(i);
+  >        }
+  >      }
+  >    
+  >      arr[0]() // 0
+  >      arr[1]() // 1
+  >    
+  >      // // 上面的代码可以如下拆解:
+  >      // // 假设用{}代表一次循环体
+  >      // // 第一次循环
+  >      // {
+  >    
+  >      //   let i = 0
+  >      //   arr[0] = function() {
+  >      //     console.log(i);
+  >      //   }
+  >      //   i++
+  >    
+  >      // }
+  >    
+  >    
+  >      // // 第二次循环
+  >      // {
+  >    
+  >      //   let i = 1 // i已经是1
+  >      //   arr[1] = function() {
+  >      //     console.log(i);
+  >      //   }
+  >      //   i++ //循环结束i是2
+  >    
+  >      // }
+  >    
+  >      // // 由于使用let声明变量有块级作用域，i是局部作用域下的局部变量。
+  >      // // 函数查找变量时，根据作用域链往上一层查找，i是不同作用域的变量，所以各自独立，输出的值就不一样。
+  >    ```
+  >
+  >    
+
+
+#### 常量const
+
++ `const`：声明常量，就是值(内存地址)不能变化的量。
+
+  + 具有块级作用域。
+
+    ```js
+     if(true) {
+        const a = 10
+        console.log(a); // 10
+    
+      }
+      console.log(a); // 报错，a is not defined
+    ```
+
+  + 使用`const`关键字声明常量时必须赋初始值。
+
+    ```js
+    const PI // 报错
+    
+    ```
+
+  + 使用`const`关键字声明的常量的值不能修改。
+
+    1. 如果这个常量是简单数据类型，值不能修改。
+
+       ```js
+       const PI = 3.14
+        PI = 5 // 报错
+       ```
+
+    2. 如果常量的值是复杂数据类型，则不能重新赋值，不能改变存在栈中的地址。但是可以改变存在堆中的数据。
+
+       ```js
+       const arr = [100, 200]
+       // 更改了内存地址
+        arr = [1, 2] // 报错
+       ```
+
+       ```js
+        const arr = [100, 200]
+        // 没有更改内存地址，只是更改了堆中的数据
+        arr[0] = 1
+        arr[1] = 2
+        console.log(arr); // [1, 2]
+       ```
+
+#### var let const 的区别
+
++ ![image-20220226154403674](img/image-20220226154403674.png)
+
++ 声明函数时可以使用const关键字，js解析时不会实时监控这个常量，执行效率会比较高。
+
+#### 结构赋值
+
++ 结构是指对复杂数据类型进行结构，赋值是指对变量进行赋值。用结构赋值是为了方便变量的赋值，省的多写代码而已。
+
++ 数组的结构赋值
+
+  + 变量和数组元素要一一对应。如果找不到对应的元素，则变量就是undefined。
+
+    ```js
+      var arr1 = [1, 2, 3]
+      // 注意：左边的是结构赋值，并不是数组，且里面的不用加引号，因为是变量。
+      var [a, b, c] = arr1
+      console.log(a); // 1
+      console.log(b); // 2
+      console.log(c); // 3
+    
+      var arr2 = [4]
+      var [d, e] = arr2
+      console.log(d); // 4
+      console.log(e); // undefined
+    ```
+
++ 对象的结构赋值
+
+  ```js
+    var person = {uname: 'hu', age: 15, sex: '男'}
+  
+    // 左侧的{}并不是对象，是解构赋值的写法。
+    // myname是uname的别名
+    var {uname: myname, age, sex} = person
+    
+    console.log(myname); // hu
+    console.log(age); // 15
+    console.log(sex); // 男
+   
+  
+  ```
+
+#### 箭头函数
+
++ 箭头函数是简化函数的定义方式而已。
+
++ 箭头函数的语法及特点
+
+  + 语法：`() => {}`
+
+  + 如果箭头函数的函数体内只有一句代码，且这句代码就是函数的返回值，可以省略大括号和return。
+
+    ```js
+     // var fn = (x, y) => {
+      //   return x + y
+      // }
+      // console.log(fn(1, 2)); // 3
+    
+    
+      // // 上面的代码可以简写
+      const fn = (x, y) => x + y
+      console.log(fn(2, 3)); // 5
+    ```
+
+  + 如果箭头函数的形参只有一个，可以省略小括号。如果没有形参，则小括号不能省略。
+
+    ```js
+      // 如果函数的形式参数只有一个，则可以省略小括号。
+      const fn = x => x
+      console.log(fn(9)); // 9
+    
+    
+      // 如果没有参数则小括号不能省略。
+      const fun = () => console.log(123)
+      fun() // 123
+    ```
+
+  + 箭头函数内部的this指向。
+
+    + 是由上一级作用域继承而来的。
+
+      ```js
+      const fn = () => {
+        //  由上一级继承而来的，上一级是全局作用域，全局作用域的this指向window。
+         console.log(this); 
+       }
+      
+       fn() // window
+      ```
+
+      ```js
+       var obj = {
+         fn: function() {
+      
+           const fun = () => {
+             console.log(this);
+           }
+           fun()
+      
+         }
+       }
+      
+      // fn是一个匿名函数，匿名函数的this指向它的直接调用者，fun是箭头函数，箭头函数的this指向是由上一级作用域继承而来的
+       obj.fn() // obj
+      ```
+
+#### 剩余参数（...arg）
+
+> `arguments`是参数的意思。
+>
+> `...a`这个就是剩余参数的写法。这个a就是剩余参数形成的数组。而`...a`是一大堆变量或者参数的省略写法。`...a`可以看成`x, y, z, k...`等这些变量或者参数的省略写法，这些变量或者参数会形成一个数组`a = [x, y, z, k]`。
+
++ 在普通函数内部，有一个`arguments`伪数组，里面存放函数调用时的所有参数。`arguments`是伪数组，所以不能使用数组的方法，如果非要遍历这个伪数组，只能使用for循环的方式。
+
+  ```js
+  function fn(a) {
+    // console.log(arguments[0]);
+    // console.log(arguments[1]);
+    // console.log(arguments[2]);
+    console.log(arguments); // 是一个伪数组，存放函数参数的所有值 [1, 2, 3]
+    console.log(a);// 1
+  }
+  fn(1, 2, 3) 
+  ```
+
++ 在箭头函数内部没有`arguments`伪数组的存在，只能用剩余参数的形式。这个剩余参数变量是一个数组，可以使用数组的方法。
+
+  + 如果只有一个剩余参数的形参，那么所有的函数调用时的实参都将存入arg这个数组里。
+
+    ```js
+    // 如果只有一个剩余参数的写法，那么所有的函数调用时的实参都将存入arg这个伪数组里。
+    const fn = (...arg) => {
+      console.log(arg); // [1, 2, 3]
+      arg.forEach(function(v) {
+        console.log(v);
+      })
+      
+    }
+    fn(1, 2, 3)
+    ```
+
+  + 如果除了arg这个剩余参数，还有其他的形参，那么这个arg将存放剩余的实参，不是所有的实参，区别于普通函数的`arguments`。
+
+    ```js
+    // 如果除了arg这个剩余参数，还有其他的形参，那么这个arg将存放剩余的实参。
+    const fn = (a, ...arg) => {
+      console.log(a); // 1
+      console.log(arg); // [2, 3]
+     
+      
+    }
+    fn(1, 2, 3)
+    ```
+
++ 剩余参数的应用
+
+  + ==剩余参数==配合==数组的解构赋值==做数组的==浅拷贝==
+
+    ```js
+    var arr = [88, 77, 66]
+    
+    // 这个是数组的结构赋值，数组里的元素一一对应赋值给剩余参数的许多变量。
+    // 这些变量会形成一个数组赋值给arr3.
+    // 从而潜移默化形成数组的浅拷贝。
+    var [...arr3] = arr
+    arr[0] = 5
+    console.log(arr3); // [88, 77, 66]
+    console.log(arr); // [5, 77, 66]
+    
+    ```
+
+#### 扩展运算符(展开语法)
+
++ 使用剩余参数的逆向思维(也叫数组的扩展运算符)做数组的拼接一
+
+  ```js
+  var arr1 = [1, 2, 3]
+  var arr2 = [4, 5, 6]
+  
+  // 因为a,b,c,d...这些变量或者参数可以简写为...arr。
+  // 那么arr = [a,b,c,d...]
+  // 所以，一个数组的所有元素就可以用...数组名表示。
+  // ...arr1就是 1, 2, 3
+  
+  var newArr = [...arr1, ...arr2]
+  console.log(newArr); // [1, 2, 3, 4, 5, 6]
+  ```
+
++ 使用扩展运算符做数组拼接二
+
+  ```js
+  var arr1 = [1, 2, 3]
+  var arr2 = [6, 7, 9]
+  arr2.push(...arr1)
+  console.log(arr2); // [6, 7, 9, 1, 2, 3]
+  ```
+
++ 利用扩展运算符可以把伪数组变为真数组。
+
+  ```html
+  <body>
+    <ul>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+  </body>
+  <script>
+    var ul = document.querySelector('ul')
+    var lis = ul.querySelectorAll('li')
+  
+    // lis是一个伪数组
+    // console.log(lis);
+  
+    // 利用扩展运算符把伪数组变为真数组，就可以使用数组对象的方法
+    var arr = [...lis]
+    console.log(arr);
+   
+  </script>
+  ```
+
++ 扩展运算符不仅可以展开数组元素，还可以展开Set数据结构
+
+  ```js
+   
+  var s1 = new Set([1, 2])
+  
+  // 虽然控制台输出{1, 2}，但是这不能直接使用{1, 2}去创建一个set数据结构。
+  console.log(s1); // {1, 2}
+  // ...s1就是 1, 2
+  
+    
+  ```
+
+  
+
+#### 数组构造函数的方法
+
++ `Array.from()`：可以把伪数组转为真正的数组。
+
+  + ```html
+    <body>
+      <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
+    </body>
+    <script>
+      var ul = document.querySelector('ul')
+      var lis = ul.querySelectorAll('li')
+    
+      // lis是一个伪数组
+      // console.log(lis);
+    
+      // 把伪数组变为真数组，就可以使用数组对象的方法
+      var arr = Array.from(lis)
+      console.log(arr);
+     
+    </script>
+    ```
+
+  + ```js
+     // 第一个参数可以是真数组，也可以是伪数组。第二个参数是一个回调函数，作用跟数组的map方法一样。
+      // 是对数组元素进行加工。通过return返回
+      var a = [1, 2]
+      var arr = Array.from(a, v => v * 2)
+      console.log(arr); // [2, 4]
+    ```
+
+#### 模板字符串
+
++ ```js
+    // 1. 可以做字符串的拼接
+    var uname = '胡鹭斌'
+    var str = `我是模板字符串${uname}`
+    console.log(str);  // 我是模板字符串胡鹭斌
+
+
+    // 2. 如果字符串的内容比较多，可以换行。普通字符串的写法，即引号的方式，字符串是不可以换行的。
+    var string = `你好啊！
+    你是傻逼吗
+    `
+    console.log(string);
+
+  
+
+
+
+    // 3. 可以调用函数
+    const fn = () => 123
+    var s = `我是${ fn() }`
+    console.log(s); // 我是123
+
+  
+
+
+
+```js
+// 4. 可以写简单的js表达式,三元运算符
+var x = 1
+var y = 99
+var str1 = `哈哈哈${x + y}`
+console.log(str1); // 哈哈哈100
+```
+#### Set数据结构
+
+>  数组，对象都是数据结构中的一种。
+
++ `Set`是一种数据结构，类似于数组，但是成员的值都是==唯一==的，==没有重复的值==。
+
+  + 应用：可以根据Set数据结构的特点，里面的数据成员是唯一的，存用户搜索的记录。因为用户搜索数据可以关键词是一样的，但是历史记录不能重复。
+  
+  +  创建`Set`数据结构，只能通过构造函数的形式。
+  
+    ```js
+    
+      //  通过Set构造函数创建一个空的Set数据结构
+       var s1 = new Set()
+       console.log(s1.size); // 0
+      
+      //  可以接受一个数组作为参数
+      var s2 = new Set([1, 2, 3, 3])
+      console.log(s2); // {1, 2, 3}
+      console.log(s2.size); // 3
+    ```
+  
+    
+  
+  + 使用`Set`数据结构可以做数组的去重。
+  
+    ```js
+      var arr = ['a', 'a', 'b', 'b']
+      var s1 = new Set(arr)
+      var newArr = [...s1]
+      console.log(newArr); // ['a', 'b']
+    ```
+  
++ `Set`数据结构的实例成员的实例方法
+
+  + `add(v)`：添加某个值，返回Set数据结构本身。
+
+    ```js
+      // 创建一个空的Set数据结构
+      var s1 = new Set()
+      // 由于返回的是Set数据结构本身，因此可以做链式操作。如果要多次添加可以用循环的做法
+      s1.add('a').add('b')
+      console.log(s1); // {'a', 'b'}
+      console.log(s1.add('a')); // {'a', 'b'}
+    
+    
+      var s2 = new Set()
+      // 如果重复添加同一个数据，只会添加这个数据一次
+      s2.add('a').add('b').add('a')
+      console.log(s2); // {'a', 'b'}
+    ```
+
+  + `delete(v)`：删除某个值，返回一个布尔值。
+
+    ```js
+      var s1 = new Set()
+      s1.add('a').add('b').add('c')
+      console.log(s1.delete('a')); // true
+      console.log(s1) // {'b', 'c'}
+    ```
+
+  + `has(v)`：表示v是否为Set成员，返回一个布尔值。
+
+    ```js
+      var s1 = new Set()
+      s1.add('a').add('b').add('c')
+      console.log(s1.has('a')); // true
+    ```
+
+  + `clear()`：清除所有成员，没有返回值。
+
+    ```js
+     var s1 = new Set()
+     
+      s1.add('a').add('b').add('a')
+      console.log(s1); // {'a', 'b'}
+      s1.clear()
+      console.log(s1.size); // 0
+    ```
+
+  + `forEach()`：对Set数据结构进行遍历。
+
+    ```js
+     var s1 = new Set([1, 2, 3, 4])
+     s1.forEach(value => {
+       console.log(value);
+     })
+    ```
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+​	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
