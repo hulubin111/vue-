@@ -466,15 +466,60 @@ vue2
   </script>
   ```
   
-  > 注意：
-  >
-  > 在使用`v-for`时，必须要绑定`:key`属性，且属性值为`item.id`，否则会报错；如果没有`item.id`，且又要防止报错，可以尝试使用索引绑定`key`值，虽然没意义，只是为了防止报错；
-  >
-  > ```vue
-  >  <img :src="item"  v-for="(item, i) in cover.images" :key="i" />
-  > ```
-  >
-  > 
++ `v-for`也可以遍历数字，对象，字符串。
+
+  + 遍历数字
+
+    ```html
+    <span v-for="(n, index) in 5" :key="index">{{ n }}</span>
+    // n是从1到5
+    // index是从0开始
+    ```
+
+  + 遍历对象
+
+    ```js
+    obj: {
+            id: 1,
+            uname: '胡鹭斌',
+            sex: '男'
+          }
+    ```
+
+    
+
+    ```html
+    <span v-for="(v, k) in obj" :key="k">{{ v }}</span>
+    ```
+
+  + 遍历字符串
+
+    ```js
+    data() {
+        return {
+             string: 'hulubin'
+        }
+    }
+         
+    ```
+
+    
+
+    ```html
+     <span v-for="(item, index) in string" :key="index">{{item}}</span>
+    ```
+
+    
+
+> 注意：
+>
+> 在使用`v-for`时，必须要绑定`:key`属性，且属性值为`item.id`，否则会报错；如果没有`item.id`，且又要防止报错，可以尝试使用索引绑定`key`值，只是为了防止报错；
+>
+> ```vue
+> <img :src="item"  v-for="(item, i) in cover.images" :key="i" />
+> ```
+>
+> 
 
 ###  过滤器
 
@@ -799,7 +844,7 @@ vue2
 
 + 可以把深度监听的对象格式的侦听器改为方法格式的侦听器；
 
-  + 开启深度监听是为了监听引用类型的数据（对象，数组）；如果直接监听对象的属性，且该属性是基本类型，就可以改为方法格式侦听器；
+  + 开启深度监听是为了监听对象里面属性的改变，数组则可以直接使用方法格式的侦听器；如果直接监听对象的属性，且该属性是基本类型，就可以改为方法格式侦听器；
 
     ```html
     <body>
@@ -2001,7 +2046,7 @@ export default {
 
     + 子组件使用`$emit()`触发自定义事件，并把值传递出去；
 
-    + 在子组件中只要写了这句代码`this.$emit('事件名', 传递的数据)`，就相当于给子组件添加了一个自定义事件，当子组件在以标签被使用时，就可以在上面绑定该事件；当 $emit 触发该事件，就会执行事件处理函数，这个事件处理函数是在父组件中被定义的，定义事件处理函数时有一个形参，这个形参是用来接收 $emit 传过来的数据的，也就是说这个形参就是子组件传过来的数据；
+    + 在子组件中只要写了这句代码`this.$emit('事件名', 传递的数据)`，就相当于给子组件触发了一个自定义事件，当子组件在以标签被使用时，就可以在上面绑定该事件；当 $emit 触发该事件，就会执行事件处理函数，这个事件处理函数是在父组件中被定义的，定义事件处理函数时有一个形参，这个形参是用来接收 $emit 传过来的数据的，也就是说这个形参就是子组件传过来的数据，类似于事件对象；
 
     + 父组件在使用子组件时，绑定自定义事件，自定义事件触发时执行在父组件定义的事件处理函数，在处理函数里接收子组件传过来的值；
 
@@ -2094,7 +2139,7 @@ export default {
 
 + 对$emit() 方法的理解：
 
-  + 每个vue实例对象或者vue组件实例对象(.vue文件)都有一个`$emit()`方法，调用该方法就要通过`this.$emit()`的形式；
+  + 每个vue实例对象或者vue组件实例对象(.vue文件)都有一个`$emit()`方法，调用该方法就要通过`this.$emit()`的形式，可以触发vue实例对象自己的事件，然后在自身绑定该事件；
   + `$emit('事件名', 发送出去的数据)`；一旦实例对象调用该方法并写了事件名和发送出去的数据，就是表示在该实例对象上添加了一个自定义的事件（事件名任意），并且要发送出去数据，这个数据的接受方是触发该事件时执行的事件处理函数定义时的一个形参；如果是组件实例对象调用$emit，那么就可以在组件使用的标签上面绑定这个自定义的事件，在父组件事件处理函数定义时的形参接受传过来的数据；如果是vue实例对象调用$emit() ，那么就要使用 $on(), 具体看  eventbus  方案；
 
 + 在vue2中，兄弟组件之间的数据共享是通过 EventBus方案，如下三步；
@@ -2864,7 +2909,7 @@ export default {
         <div>
           <h1>这是根组件</h1>
           <hr>
-      <!-- 指定Left组件可以被缓存；Right组件不会被缓存，隐藏时就是被销毁，显示时就是被激活； -->
+      <!-- 指定Left组件可以被缓存；Right组件不会被缓存，隐藏时就是被销毁，显示时就是被创建； -->
           <keep-alive include="Left">
             <component :is="comName"></component>
           </keep-alive>
@@ -3269,6 +3314,8 @@ export default {
 
 + 除了vue提供的指令，我们还可以自定义；
 
+  > 指令的主要作用就是对当前使用这个指令的dom元素进行操作。
+
 + 私有自定义指令：
 
   + 只能在当前的组件使用；
@@ -3374,7 +3421,9 @@ export default {
       
           color: {
             // 第一次绑定被调用，只被调用一次
-            bind(el, binding) {
+            bind(el, binding, vnode) {
+                // el是指令绑定的dom元素.binding能够获取到指令传入的数据。vnode.context能够获取到当前组件的实例this。
+                 // console.log(binding.modifiers) // 这个对象里是指令修饰符
          
               el.style.color = binding.value
             },
@@ -4020,10 +4069,25 @@ export default {
 
   + 注意：==多个hash值对应一个组件（动态路由），或者一个hash值对应一个组件都会出现路由传参；==
 
-  + 注意：![image-20220201231118609](img/image-20220201231118609.png)
+  + 路由传参的两种形式：
 
-    + 以params的形式，路由规则必须要有占位；以query的形式则不用。
-    + 如何制定params参数可传可不传？
+    1. 路径参数（params）的形式
+  
+       + 以字符串的路径参数（字符串的拼接或者模板字符串）
+       + 以对象的写法的路径参数
+  
+    2. 查询字符串（query）的形式
+  
+       + 以字符串的路径参数（字符串的拼接或者模板字符串）
+       + 以对象的写法的路径参数
+
+       ![image-20220201231118609](img/image-20220201231118609.png)
+
+       > 以params的形式（路径参数），路由规则必须要有占位；以query的形式（查询字符串）则不用。
+
+  + 面试题：
+
+    + 如何指定params参数可传可不传？
       + ![image-20220201232702238](img/image-20220201232702238.png)
       + ![image-20220201232608106](img/image-20220201232608106.png)
     + ![image-20220201233249951](img/image-20220201233249951.png)
@@ -4031,19 +4095,19 @@ export default {
       + ![image-20220201234021659](img/image-20220201234021659.png)
       + ![image-20220201234411414](img/image-20220201234411414.png)
       + 
-
+  
   + 路由传参之动态路由（params的方式），把要传递的参数放到`/`后面，这个参数叫路径参数；
-
+  
     + 如果多个hash值对应一个组件，使用下面这种方法可以生命路由，但是复用性差：
-
+  
     ![image-20211104150502548](img/image-20211104150502548.png)
-
+  
     + 因此，使用下面这种提高路由规则的复用性： 
   
     ![image-20211104150828880](img/image-20211104150828880.png)
-
+  
     + 通过动态路由的方式，把路由规则中可变部分变为参数项，提高了路由规则的复用性；`:参数`相当于是一个占位符；只要路由链接的Hash值满足动态路由规则的形式，就会展示对应的组件；==多个Hash值对应一个组件；==
-
+  
   + 1. 通过`$route`，这个路由的参数对象，组件可以拿到Hash值可变部分的路径参数，进而通过参数获取该参数所对应的数据渲染到页面，但是组件是同一个，数据不同；现实中的应用：比如每部电影都有其对应的详情信息，可以通过路由传参的方式把这步电影的 id 传进去给组件，组件拿到 id 就可以获取到这部电影的详情信息；(看下面的案例演示)
   
     2. 除了上面的通过`$route`拿到动态参数值之外，还可以通过`props`拿到路径参数值；这两种方法都可以，推荐使用第二种比较简单；
@@ -4192,7 +4256,7 @@ export default {
     > > 注意：通过路由显示的组件，没有和哪个组件是父子关系或者兄弟关系，所以从一个组件传递参数给路由组件只能是以路由传参的形式；而普通的组件，则有父子关系和兄弟关系，所以可以通过自定义属性和自定义事件等方式传递参数；
     >
     > 
-
+  
   + 路由传参之 query 的方式；
   
     + 在路由链接传入查询参数，`?xx=xx&xx=xx`；
@@ -5930,10 +5994,2929 @@ export default {
 
 ### 尚品汇---前台项目
 
-#### 给src设置别名
++ **开发一个页面的流程**
+  1. 先整体把整个静态页面写出来。
+  2. 拆分组件。
+  3. 发请求.
 
-+ ![image-20220205170015800](img/image-20220205170015800.png)
++ **通过配置文件的形式给src设置别名**
+
+  ![image-20220205170015800](img/image-20220205170015800.png)
+
++ **main.js的作用**：
+
+  + 是webpack打包的入口文件。
+  + webpack当在打包时main.js时会根据在这个文件导入的模块，进而去打包其他文件夹里代码。
+  + 所以，当你在项目的其他文件夹写了各种模块时，记得注意要直接或者间接导入到main.js文件里，不然那些模块是没有被运行的。
+
++ **路由组件和非路由组件**
+
+  + 路由组件
+
+    + 放在views文件夹里。
+
+    + 是在路由模块里以组件名被使用的。
+
+    + 当路由模块向外导出路由实例对象时，要在main.js文件里的Vue构造函数里的对象参数的router属性注册。
+
+    + 注册好了之后，不管是路由组件的实例对象还是非路由组件都有`$route`和`$router`的属性，属性值为对象。
+
+      > $route：路由信息，如query，params，meta
+      >
+      > $router：用来做编程式导航，如replace方法,push方法
+
+  + 非路由组件
+
+    + 放在components文件夹里。
+    + 以标签的形式被使用。
+
++ **路由的跳转**
+
+  1. 声明式导航
+     + 使用router-link标签，它就是a标签。
+  2. 编程式导航
+     + 通过$outer.push()
+
++ **路由元信息**
+
+  + 相当于给当前这个路由组件做了标记。
+
++ **路由传参**
+
+  1. params参数，以/xxx的形式，属于url路径的一部分，配置路由规则时需要占位。
+  2. query参数，以?k=v&kk=vv的形式，不属于url路径的一部分，配置路由规则时不需要占位。
+
+  > 面试题1：路由传递参数（对象的写法），path能否与params一起使用？
+  >
+  > 答：不可以。路由传递参数对象的写法，可以用name或者path的形式。但是当使用path的时候，不可以与params一起使用。params只能与name一起使用。
+  >
+  > ```js
+  > 可以：this.$router.push({name:'home', params: {k: 'haha'}})
+  > 不可以：this.$router.push({path:'/home', params: {k: 'haha'}})
+  > ```
+  >
+  > 
+  >
+  > 面试题2：如指定params参数可传可不传？
+  >
+  > > 当我们在配置路由规则时，如果已经路径占位了，那么当要使用这个规则的路径去做路由跳转，不传递路径参数的话会出问题。
+  >
+  > 答：只需要在配置路由规则时，在路径占位的后面加一个问号。
+  >
+  > ```js
+  > {path: '/home/:k?', name: 'home', component: Home}
+  > this.$router.push({name: 'home'}) // 可以不传，也可以传
+  > ```
+  >
+  > 面试题3：如果params参数传了，但是传了一个`''`空字符串，那么路径是会出现问题的。
+  >
+  > 答：通过或的方式，逻辑运算符有逻辑中断，如果或的前面是真，则表达式结果就是前面部分。如果前面是假，结果就是看后面的部分。
+  >
+  > ```js
+  > {path: '/home/:k?', name: 'home', component: Home}
+  > this.$router.push({name: 'home', params: {k: '' || undefined}}) // 可以不传，也可以传。但是如果传了，且传递空字符串，就这么解决。
+  > ```
+  >
+  > 面试题4：路由组件是否可以传递props？
+  >
+  > 答：可以，有三种方式：
+  >
+  > 1. 在配置路由规则时，给props属性设置为true。这个只能传递params参数。然后在接受params参数的路由组件通过props属性去接受params。下次可以直接使用这个props数据，不用通过this.$route.params.xxx获得。
+  >
+  >    ```js
+  >    {path: '/home/:k?', name: 'home', component: Home, props: true}
+  >                                                       
+  >    // 在接受params参数的路由组件里，接受props参数
+  >    props: ['k']
+  >    ```
+  >
+  >    
+  >
+  > 2. 在配置路由规则时，给props属性设置为对象的形式。可以给这个路由组件额外传递props数据。（==不重要==）
+  >
+  >    ```js
+  >    {path: '/home/:k?', name: 'home', component: Home, props: {a: 1, b: 2}}
+  >    
+  >    // 在Home的路由组件里，接受额外的props参数可以使用
+  >    props: ['a', 'b']
+  >    ```
+  >
+  > 3. 在配置路由规则时，给props属性设置为函数的形式。这个既可以传递params参数，也可以传递query参数。就是在获得这两个参数时比较方便而已，不用再以this.$route.params.xxx      (==不重要==)
+  >
+  >    ```js
+  >    {path: '/home/:k?', name: 'home', component: Home, props: ($route) => {return {k: $route.params.k,
+  >                                                                                  k1: $route.query.k1}}}
+  >                                                       
+  >    // 在接受参数的路由组件里
+  >    props: ['k', 'k1']
+  >    ```
+
++ **编程式导航报错**（声明式导航vue已经帮我们解决）
+
+  + 报错信息
+
+    ![image-20220304194844083](img/image-20220304194844083.png)
+
+  + 报错原因：
+
+    + 当第一次已经导航到路由组件之后，继续多次执行该导航代码，由于已经显示该路由组件了，继续导航就会报错。
+
+    + 由于最新的vue-router引入了Promise。Promise如果出错了，错误没有被捕获就会报错出来。
+
+      ```js
+       // 当promise执行成功之后，有回调函数没有回调函数都可以
+        new Promise((resolve, reject) => {
+          resolve()
+        })
+      
+      
+        // 当promise执行失败，必须要要有失败的回调去捕捉错误，否则会在控制台显示错误。
+        new Promise((resolve, reject) => {
+          reject()
+        })
+      
+        // 所以要加失败的回调函数就不会在控制台报错
+        new Promise((resolve, reject) => {
+          reject()
+        }).then(() => {}, () => {})
+      ```
+
+      由于push的方法的返回值是一个Promise实例，说明Promise里面的代码已经被执行了，且需要有错误的回调函数传入push方法。（注意，new一个构造函数就是相当于在调用这个构造函数，所以当Promise被new时，它里面的回调函数是被执行的。）当使用下面的方式，每次使用push或者replace方法，都要传入成功和失败的回调，很麻烦。
+
+      ```js
+      // 当调用push这个方法时如下做法可以解决
+      this.$router.push(
+              { name: 'search' },
+              () => {},
+              () => {}
+            )
+      ```
+
+      所以，在路由模块直接重写push和replace方法
+
+      ```js
+      // 重写push方法
+      // 保留着原来push方法，因为还要用
+      const originPush = VueRouter.prototype.push
+      
+      // 当使用this.$router.push方法，就是执行下面的代码
+      VueRouter.prototype.push = function (location, resolve, reject) {
+        // 如果两个回调函数都有传
+        if (resolve && reject) {
+          // 如果直接调用originPush，它的this指向为window，所以要改变this指向为VueRouter的实例对象
+          originPush.call(this, location, resolve, reject)
+        } else {
+          // 如果都没有传就替它传
+          originPush.call(
+            this,
+            location,
+            () => {},
+            () => {}
+          )
+        }
+      }
+      // 重写replace方法
+      // 保留着原来replace方法，因为还要用
+      const originReplace = VueRouter.prototype.replace
+      
+      // 当使用this.$router.push方法，就是执行下面的代码
+      VueRouter.prototype.replace = function (location, resolve, reject) {
+        // 如果两个回调函数都有传
+        if (resolve && reject) {
+          // 如果直接调用originPush，它的this指向为window，所以要改变this指向为VueRouter的实例对象
+          originReplace.call(this, location, resolve, reject)
+        } else {
+          // 如果都没有传就替它传
+          originReplace.call(
+            this,
+            location,
+            () => {},
+            () => {}
+          )
+        }
+      }
+      
+      ```
+
++ **路由跳转组件的创建和销毁**
+
+  1. 如果从一个组件跳转到另一个组件，这时有组件的创建和销毁。
+
+  2. 如果从当前的组件，根据声明式导航或者编程式导航，跳转到的组件仍然是当前的组件，此时不存在组件的切换，那么当前这个组件不会被销毁和重新创建。那么，该组件的==created和mounted只会执行一次==。一旦在这里发起请求，只会发起一次请求。
+
+     > 针对只发起一次请求，而我们要只要路由变化拿到路由参数去发起多次请求，就要监听路由变化，去发起多次请求。
+     >
+     > ```js
+     >   watch: {
+     >     $route: {
+     >       handler(newValue, oldValue) {
+     >         // 发起请求前整理请求参数
+     >         Object.assign(
+     >           this.searchParams,
+     >           this.$route.query,
+     >           this.$route.params
+     >         )
+     >           // 发起请求
+     >         this.initSearchInfo()
+     >       },
+     >       deep: true
+     >     }
+     >   }
+     > ```
+     >
+     > 
+
++ **axios的二次封装**
+
+  封装请求模块request.js，以下的封装是默认没有开启跨域共享。(协议，域名，端口号不同就是跨域)
+
+  ```js
+  import axios from 'axios'
+  
+  const request = axios.create({
+    // 发起请求时，请求路径/api这部分可以省略，这个/api指的是发起请求时，可以省略这个开头的字符
+    baseURL: '/api',
+    // 如果五秒之后没有响应就是请求超时
+    timeout: 5000
+  })
+  
+  // 配置请求拦截器
+  request.interceptors.request.use(
+    (config) => {
+      // 在发送请求之前会走这个回调函数，主要用来设置token
+      return config
+    },
+    (e) => {
+      // 请求失败之后会走这个回调
+      return Promise.reject(e)
+    }
+  )
+  
+  request.interceptors.response.use(
+    function (response) {
+      // 响应成功之后走这里，response就是响应的数据，由于axios会套一层壳，可以直接返回response.data，就是真实数据
+      return response.data
+    },
+    function (e) {
+      // 响应失败走这里，大于200的状态码，统一处理报错信息
+      return Promise.reject(e)
+    }
+  )
+  
+  export default request
+  
+  ```
+
+  在vue.config.js做proxy跨域代理（==正确理解版本==）
+
+  ```js
+  module.exports = {
+    devServer: {
+      proxy: {
+        // 当发起请求，proxy发现接口有/api，就会发起代理，把http://39.98.123.211真实路径粘贴过去写的请求路径的前面  
+        '/api': {
+          target: 'http://39.98.123.211',
+          ws: true,
+          changeOrigin: true,
+            // 把以/api开头的字符替换为空。如果你原本的请求路径有/api开头的，那么不需要把它替换为空。
+          pathRewrite: {
+            '^/api': ''
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  
+
+  
+
++ **接口统一管理**
+
++ **nprogress进度条插件**
+
+  1. 下载：`npm i nprogress -S`
+
+  2. 在请求模块里的请求拦截器和响应拦截器设置。记得导入模块和样式。
+
+     ```js
+     // 导入进度条插件
+     import nprogress from 'nprogress'
+     // 还要引入样式
+     import 'nprogress/nprogress.css'
+     
+     // 请求拦截器请求之前的回调函数
+     // 发起请求之前，开始进度条
+         nprogress.start()
+     
+     // 响应拦截器响应成功之后的回调函数
+      // 响应成功之后，结束进度条
+         nprogress.done()
+     ```
+
+  3. 可以在node_module文件夹里的nprogress里的nprogress.css去设置进度条的颜色
+
++ **vuex状态管理库**
+
+  + vuex是vue官方提供的一个插件，集中式管理项目中组件共用的数据。
+
+  + 并不是所有的项目都要用vuex，如果是小项目，数据不多，组件不多，完全不需要。
+
+  + 如果项目比较大，组件多，数据多，用vuex。
+
+  + vuex模块化开发
+
+    + 为什么要vuex模块化开发？
+
+      + 因为，如果有许多组件，需要共享的数据太多了，完全挤在state对象里面，就会很臃肿，不方便管理。
+      + vuex模块化开发就是把一个state的大仓库拆分成许多的小仓库，最后合并到这个大仓库。
+      + 但是虽然是小仓库，但是，这些小仓库里面的数据，方法，也是全局所有的组件都可以使用的。只是为了数据更清晰，更易于管理。
+
+    + 模块化开发操作
+
+      1. 我们可以根据一个页面分为一个vuex模块。这个页面由许多组件组成，这些组件有需要共用的数据，就可以存在这个小仓库里。
+
+         在store文件夹里新建一个比如home小仓库的文件夹，文件夹里的index.js代码如下。这个仓库放着home页面里所有组件共用的数据。（当然这个仓库里的数据，也可以被别的页面的组件使用，是全局共用的）
+
+         ```js
+         const state = {
+           a: {
+               id: 1,
+               uname: '杜兰特'
+           }
+         }
+         const mutations = {}
+         
+         const actions = {}
+         
+         const getters = {}
+         
+         export default {
+           state,
+           mutations,
+           actions,
+           getters
+         }
+         
+         ```
+         
+         在store根目录的index.js里导入，在modules里注册合并到大仓库。
+         
+         ```js
+         import Vue from 'vue'
+         import Vuex from 'vuex'
+         import home from './home/'
+         
+         Vue.use(Vuex)
+         
+         export default new Vuex.Store({
+           modules: {
+             home
+           }
+         })
+         
+         ```
+         
+         当在组件里使用时，记得加一个home属性，如`this.$store.state.home.a`。但是一般是使用映射。
+         
+         ```js
+         // 使用映射除了可以使用数组，还可以使用对象格式。映射的是大仓库的数据，使用数组格式即可。
+         computed: {
+             ...mapState(['a'])
+         }
+         
+         computed: {
+             ...mapState({
+                 // 这么写可以改变映射过来的名字，还可以做计算属性操作。
+                 // 最好不要改变state的名字，比较统一。state是指大仓库。
+                 // 注意：如果映射过来的是小仓库的数据，只能使用对象的写法。
+                 id: state => {
+                     return state.home.a.id
+                 },
+                 // 可以挨个拿你想拿的数据
+                 uname: state => state.home.a.uname
+             })
+         }
+         ```
+         
+         > 注意：使用vuex模块化，只有state的数据是分模块。mutaions,actions,getters都不分模块，都是跟在大仓库里的使用方法一样。
+    
+  + getters的作用就是计算属性，为了简化数据而生。
+
+    + 由于使用vuex模块化开发，会有大仓库和小仓库的概念。只有state里的数据具有模块化，mutations，actions，getters都是跟大仓库的使用方法一样的。因此，映射模块化state里的数据就要通过对象的形式，不能通过数组的形式，因为数组的形式只能映射state数据的第一层属性。使用对象形式的好处就是可以把映射过来的数据拿到任何一层。如果要拿到更深层里的数据，就要一直.，也就是在不同组件里映射就要这么麻烦。
+
+      ```js
+       // search模块里的数据
+      const state = {
+        searchInfo: {
+            attrsList:[xxxx...],
+             goodsList:[xxxx...],
+             trademarkList:[xxxx...]
+        }
+      } 
+      
+      computed: {
+          ...mapState({
+              // 这里的state是大仓库的state
+            attrsList: state => state.search.searchInfo.attrsList,
+            goodsList: state => state.search.searchInfo.goodsList,
+            trademarkList: state => state.search.searchInfo.trademarkList
+          })
+        }
+      ```
+
+      可以通过getters简化数据，最后在组件里获取比较简单
+
+      ```js
+      const getters = {
+        attrsList(state) {
+          // 这里的state是小仓库的state
+             // 由于我们返回的是服务器返回的数据的属性。请求回来之前，初始数据是没有的，页面会先去渲染，那么就没有attrsList这个属性，就会是undefined，要或一下给个初始值。
+          // state.searchInfo.attrsList的结果就是undefined。那么当在页面使用这个数据遍历时肯定会出错。
+          // 所以，要如下处理。
+          return state.searchInfo.attrsList || []
+        },
+        goodsList(state) {
+          // 这里的state是小仓库的state
+          return state.searchInfo.goodsList || []
+        },
+        trademarkList(state) {
+          // 这里的state是小仓库的state
+          return state.searchInfo.trademarkList || []
+        }
+      }
+      
+      //最后映射getters里的数据，只需要使用数组的格式
+      ...mapGetters(['attrsList', 'goodsList', 'trademarkList'])
+      ```
+
+  + actions里面的函数的context参数是一个对象，对象里的commit方法可以调用mutations里的函数；对象里的state，getters属性可以获取state，getters的数据；dispatch方法可以调用actions里的函数。
+
++ **三级联动**
+
+  + 写三级联动骨架时，最外一级要套着第二级，第二级要套着第三级。
+
+  + 当有许多并列的元素，只要点击其中一个就变色，点击别的它恢复，别的元素变色。方法有两种：
+
+    + 原生的js：排他思想。
+
+    + vue：
+
+      通过数组的索引，当点击某个元素把这个元素的索引给存到data里，如果元素的索引与存入data里的数据相等就是true，就把类名给添加。
+
+      ```vue
+       <h3
+             :class="{ curhover: index === currindex }"
+              @click="changeindex(index)"
+         ><h3>
+           
+           data() {
+           return {
+           	currindex: -1
+           }
+           }
+           
+           methods: {
+           changeindex(i) {
+           this.currindex = i
+           }
+           }
+      ```
+
+      
+
++ **自定义属性**（有两种方式，这种方式比较简单）
+
+  + 作用：可以存数据，可以给某个元素做标记。
+
+  + 使用：
+
+    ```html
+    <body>
+      
+     <div data-attrOne="111" data-attrSecond="222"></div>
+    
+    </body>
+    <script>
+    
+     let div = document.querySelector('div')
+    //  element.dataset的属性值为一个对象，里面存的是元素的自定义属性。
+    // 如果有驼峰记得写小写。属性名不用加data-
+     console.log(div.dataset.attrone);
+     console.log(div.dataset.attrsecond);
+    </script>
+    ```
+
+    
+
++ **防抖函数**和**节流函数**
+
+  > 为什么需要防抖和节流？
+  >
+  > 答：如果频繁触发事件，就频繁执行事件处理函数。如果事件处理函数的业务逻辑很麻烦，则可能会出现卡顿的现象，且如果事件处理函数需要向服务器发起请求，则会频繁发起，给服务器造成压力。防抖和节流的的作用，就是当频繁触发事件，减少，合理的执行事件处理函数。
+  >
+  > > 事件触发都会执行事件后面的函数。
+
+  + 防抖函数：
+
+    + 作用：事件被触发后设定的时间后才会执行事件处理函数，如果时间没到再次触发事件，原来的处理函数就会被替换，再次重新计时，时间到了执行这个函数，如果没到再次触发事件，再次替换，再次重新计时，以此类推。
+
+    + 原理：是lodash对象的一个方法，这个方法返回值为一个新函数，这个函数会在设定的时间后被调用，如果在设定的时间内把原来的函数给替换成新函数，函数里的定时器就会重新计时，因此就不会执行事件处理函数。
+
+      原生的防抖函数（闭包+定时器）
+
+      ```js
+       let btn = document.querySelector('button')
+        btn.onclick = debounce(function() {
+          console.log('胡');
+        },2000)
+      
+      
+        function debounce(callback, t) {
+      
+          let timer
+          return function() {
+            clearTimeout(timer)
+            timer = setTimeout(callback, t)
+          }
+      
+        }
+       
+      ```
+
+      lodash的使用防抖函数
+
+      ```html
+      <body>
+        <input type="text">
+        <button>按钮</button>
+      
+      </body>
+      <script src="./lodash.min.js"></script>
+      <script>
+        
+        let inp = document.querySelector('input')
+        inp.addEventListener('input', _.debounce(() => {
+          console.log('123');
+        }, 2000))
+       
+      
+      </script>
+      ```
+
+  + 节流函数：
+
+    + 作用：第一次会执行一次事件处理函数，如果在设定时间内多次触发事件，只会执行一次事件处理函数。把频繁执行事件处理函数，变为少数执行。
+
+      lodash使用节流函数
+
+      ```html
+      <body>
+        <input type="text">
+        <button>按钮</button>
+      
+      </body>
+      <script src="./lodash.min.js"></script>
+      <script>
+        
+      
+        let inp = document.querySelector('input')
+        inp.addEventListener('input', _.throttle(() => {
+          console.log('123');
+        }, 3000))
+      
+       
+      
+      </script>
+      ```
+
+  + 在vue-cli项目中，可能已经装了lodash，如果没有再自己安装。
+
+    ```js
+    npm i --save lodash
+    
+    // 把全部的功能函数引入，性能不好。
+    import _ from 'lodash'
+    
+    // 一般导入某个函数即可。由于lodash是每个函数为一个模块，且是默认导出，因此就要默认导入，不是按需导入。
+    import throttle from 'lodash/throttle.js'
+    
+    // 在methods里使用节流函数
+     methods: {
+        // 使用节流函数，规定在50毫秒内多次触发只执行一次。避免写箭头函数。会改变this指向。
+        changeindex: throttle(function (i) {
+          this.currindex = i
+        }, 50)
+      }
+    ```
+
++ **vue过渡动画**
+
+  ```vue
+  <template>
+    <div class="search-container">
+      <!-- 如果加了名字，类名的v用hu替代 -->
+      <!-- <transition name="hu"> -->
+        
+      <transition >
+        <div class="aaa" v-show="flag"></div>
+      </transition>
+      <button @click="change">点击</button>
+    </div>
+  </template>
+  
+  <script>
+  export default {
+    name: 'Search',
+    data() {
+      return {
+        flag: true
+      }
+    },
+    methods: {
+      change() {
+        this.flag = !this.flag
+      }
+    }
+  }
+  </script>
+  
+  <style lang="less" scoped>
+  .aaa {
+    width: 200px;
+    height: 200px;
+    background: red;
+  }
+  
+  // 只有使用v-if或者v-show的元素或者组件才可以做过渡动画。即要显示与隐藏的状态。
+  
+  // 开始离开，就是准备隐藏
+  .v-leave {
+    height: 200px;
+  }
+  
+  // 离开结束，隐藏完毕
+  .v-leave-to {
+    height: 0;
+  }
+  
+  // 设置过渡的时间和速率
+  .v-leave-active {
+    transition: all 2s linear;
+  }
+  
+  
+  // 准备进入，即准备显示
+  .v-enter {
+    height: 0px;
+  }
+  
+  // 进入完毕，即显示完毕
+  .v-enter-to {
+    height: 200px;
+  }
+  
+  // 设置隐藏过渡动画的时间和速率
+  .v-enter-active {
+    transition: all 2s;
+  }
+  </style>
+  ```
+
++ **减少发起请求的方法**
+
+  1. 如果一个组件要被多次使用，只要组件被切换，那么肯定会涉及到组件的创建和销毁。尽管是同一个组件，但是组件在不同地方使用就是不同的实例对象。如果在这个组件里发起请求，并把请求到的数据保存到data，当组件被多次使用就会发起多次请求。
+
+     > 解决：可以把请求到的数据放到vuex仓库中，只通过派发的方式发起一次请求，得到的数据就是全局共用的了。但是，派发一次方法肯定不能在这个被多次使用的组件上，而要在App.vue根组件里的created里，因为根组件从头到尾created只会执行一次。且根组件里的created函数是最早执行的。但是，同样是执行一次的main.js，这个派发方法是不可以放到这里的，因为要通过`this.$store.dispatch()`，这里的this是组件实例对象。main.js明显就不是组件。
+
++ **合并路由参数**（例子在尚品汇的三级联动和头部的搜索框）
+
+  + 背景：假如点击某个链接按钮是跳转到搜索的路由组件，并且要把该链接按钮的内容给搜索路由组件通过query参数传递过去。还有一个搜索按钮，也是点击搜索把搜索内容通过params参数传递给搜索路由组件。搜索组件会根据参数的内容发起数据请求。会出现以下两种情况：
+
+    1. 如果点击链接，跳转到搜索组件，搜索组件只能拿到query参数。当在搜索组件里也通过搜索内容搜索，会把之前的query参数给替换成params参数。那么这种情况显然通过接口获取到的数据是不全面的。所以要合并两者之间的参数，通过判断：
+
+       ```js
+          const location = {
+               name: 'search',
+               params: { keyword: this.searchV || undefined }
+             }
+       
+             if (this.$route.query) {
+               location.query = this.$route.query
+             }
+       
+             this.$router.push(location)
+       ```
+
+    2. 如果有params参数，要把params参数合并进去。
+
+       ```js
+        // 1.但是需要点击a标签才可以跳转到search，可以通过自定义属性。
+             // 2.规定传到服务器的id，需要我们指明是一级id还是二级id，还是三级id。也是通过自定义属性判定。
+             const { categoryname, category1id, category2id, category3id } =
+               e.target.dataset
+             if (categoryname) {
+               const location = { name: 'search' }
+               const query = { categoryName: categoryname }
+               if (category1id) {
+                 query.category1Id = category1id
+               } else if (category2id) {
+                 query.category2Id = category2id
+               } else {
+                 query.category3Id = category3id
+               }
+               location.query = query
+               // 点击三级联动的所有类名都可以实现跳转到search路由组件。可以使用声明式导航，也可以使用编程式导航。
+               // 但是如果把每一个类名的a标签改为router-link组件。我们知道每一个组件的使用，
+               // 就是相当于实例化一个VueComponent构造函数的实例对象。
+               // 三级联动的类名很多，就会实例化很多组件实例，当鼠标滑动一级类名时，三级联动的效果会卡顿。
+               // 所以使用编程式导航比较好。但是使用编程式导航就要绑定点击事件，
+               // 如果每个种类名都绑定事件肯定影响性能，所以使用事件委托的方式绑定事件到父节点。
+       
+               // 如果有params参数，要合并参数
+               if (this.$route.params) {
+                 location.params = this.$route.params
+               }
+               this.$router.push(location)
+             }
+       ```
+
++ **mock模拟数据接口**
+
+  + 什么是mock数据？
+
+    > 如果后端的数据还没写完或者没有数据，我们又想模拟发起请求得到数据，不妨碍项目开发的进度。可以使用mockjs包mock数据。
+    >
+    > 当我们mock数据时，是不会跟后台的服务器进行通信的，会被浏览器拦截，只是在前台进行数据交互，因为是模拟。
+
+  + 步骤：
+
+    1. 安装插件：`npm install mockjs -S`
+
+    2. 在src目录下创建mock文件夹，用来存放假数据。
+
+    3. 在src文件夹里的mock文件夹创建相应的.json文件，json文件是请求时需要得到的数据。json数据不要留有空格，可以右键格式化一下。json数据不用导出，webpack会默认导出。webpack默认导出的还有图片。图片的路径是`/xx`表示，当我们ctrl+s保存时打包或者项目上线时，都是在跟index.html文件同级的地方拿图片。
+
+       banner.json
+
+       ```json
+       [
+         {
+             "id":"1",
+             "imgUrl":"/images/banner1.jpg"
+         },
+         {
+             "id":"2",
+             "imgUrl":"/images/banner2.jpg"
+         },
+         {
+             "id":"3",
+             "imgUrl":"/images/banner3.jpg"
+         },
+         {
+             "id":"4",
+             "imgUrl":"/images/banner4.jpg"
+         }
+       ]
+       
+       ```
+
+       
+
+    4. 把mock数据需要的图片放置到public文件夹里。（public文件夹里在打包时，会把相应的资源原封不动打包到dist文件夹里）
+
+       ![image-20220307180908129](img/image-20220307180908129.png)
+
+    5. 在mock文件夹里，创建mockServe.js文件，通过mockjs插件模拟接口。
+
+       mockServe.js
+
+       ```js
+       import Mock from 'mockjs'
+       
+       // json文件在webpack中都是默认自动导出的，不用手动导出
+       import banner from './banner.json'
+       import floor from './floor.json'
+       
+       // mock方法，第一个参数请求地址，第二个参数响应的数据
+       
+       Mock.mock('/mock/banner', {code: 200, data: banner})
+       Mock.mock('/mock/floor', {code: 200, data: floor})
+       
+       // 不用导出，只要在main.js里导入这个js文件的代码，让它运行即可
+       
+       
+       ```
+
+       
+
+    6. mockServe.js文件在入口文件main.js里导入，让它运行一次。
+
+       ```js
+       // 导入mockServe.js让它运行
+       import './mock/mockServe.js'
+       ```
+
+    7. mock出来的接口可以当成真的接口使用，只是不向服务器发起请求。请求语法都没有变。但是，不能以原来的请求模块去发起，因为原来的模块的baseurl有设置了，而我们模拟的接口的baseurl应该是/mock开头。所以，可以重新封装一个请求模块，专门来做mock接口的请求。
+
+       ```js
+       import axios from 'axios'
+       import nprogress from 'nprogress'
+       
+       import 'nprogress/nprogress.css'
+       
+       const mockRequest = axios.create({
+         // 基础路径
+         baseURL: '/mock',
+         timeout: 5000
+       })
+       
+       mockRequest.interceptors.request.use(
+         (config) => {
+           nprogress.start()
+       
+           return config
+         },
+         (e) => {
+           return Promise.reject(e)
+         }
+       )
+       
+       mockRequest.interceptors.response.use(
+         function (response) {
+           nprogress.done()
+       
+           return response.data
+         },
+         function (e) {
+           return Promise.reject(e)
+         }
+       )
+       
+       export default mockRequest
+       
+       ```
+
++ **swiper轮播图和$nextTick配合watch的详细使用**
+
+  > 注意：
+  >
+  > 1. swiper轮播图，如果你自己不写样式则默认是导入的样式。因此，可以自己根据结构的类名定制自己想要的样式。 
+  > 2. 轮播图容器一旦设置了大小，里面的图片就不会超出。如果容器设置为横的比较长，图片可能会在容器里横着排列。
+
+  + swiper插件可以用在pc端和移动端，主要用在做轮播图。
+
+  + 官网：https://www.swiper.com.cn/
+
+  + 可以到官网的这里看基础用法
+
+    ![image-20220307195209746](img/image-20220307195209746.png)
+
+    页面基础使用（先使用5版本比较稳定）
+
+    ```html
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Document</title>
+      <!-- 不论在脚手架还是在html页面，都要引入js文件和css文件 -->
+      <script src="./swiper.min.js"></script>
+      <link rel="stylesheet" href="./swiper.min.css">
+      <style>
+        /* 可以给容器设置一个大小 */
+        .swiper-container {
+        width: 600px;
+        height: 300px;
+    }  
+      </style>
+    </head>
+    <body>
+      <!-- 新建一个swiper容器 -->
+      <div class="swiper-container">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide">Slide 1</div>
+            <div class="swiper-slide">Slide 2</div>
+            <div class="swiper-slide">Slide 3</div>
+        </div>
+        <!-- 如果需要分页器 -->
+        <div class="swiper-pagination"></div>
+        
+        <!-- 如果需要导航按钮 -->
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+        
+       
+    </div>
+      
+    </body>
+    <script>
+        // 初始化一个swiper实例对象。注意：必须先有dom结构才可以初始化，因为要操作dom 
+        // 构造函数里的配置，需要到官网去看，不能随便乱写
+        // Swiper构造函数的第一个参数可以是类名或者是dom元素对象
+      var mySwiper = new Swiper ('.swiper-container', {
+        // direction: 'vertical', // 垂直切换选项(默认是水平模式)
+        loop: true, // 循环模式选项
+        // 如果需要分页器
+        pagination: {
+          el: '.swiper-pagination'
+        },
+        // 如果需要前进后退按钮
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev'
+        }
+      })        
+      </script>
+    </html>
+    ```
+
+    vue脚手架里的使用
+
+    1. 安装插件，安装5版本比较稳定：`npm install swiper@5 -S`
+
+    2. 在哪个组件用就导入构造函数，`import Swiper from 'swiper'`
+
+    3. 在main.js文件导入样式：`import 'swiper/css/swiper.css'`
+
+    4. 要在组件里模板把关于swiper的容器骨架搭建好
+
+       ```html
+        <div class="swiper-container">
+           <div class="swiper-wrapper">
+               <div class="swiper-slide">Slide 1</div>
+               <div class="swiper-slide">Slide 2</div>
+               <div class="swiper-slide">Slide 3</div>
+           </div>
+           <!-- 如果需要分页器 -->
+           <div class="swiper-pagination"></div>
+           
+           <!-- 如果需要导航按钮 -->
+           <div class="swiper-button-prev"></div>
+           <div class="swiper-button-next"></div>
+           
+          
+       </div>
+       ```
+
+    5. 初始化一个swiper实例注意点：
+
+       1. 由于当我们需要的图片是要发起请求的，只有请求得到图片渲染到页面，才可以实例化swiper操作dom元素。然而请求是异步任务，就算把初始化实例放在请求的后面，由于异步任务会在任务队列里等待同步任务完成后才会轮询。就算我们把请求放到created里面执行，初始化实例在mounted执行，也会先执行初始化实例。又因为初始化实例需要操作dom元素，而轮播图的元素需要依赖请求的数据去遍历，因此轮播图失效。
+
+       2. 那么可以在mounted里使用`$nextTick()`吗？不可以，由于请求是异步的，会先执行`$nextTick`方法，然而这个方法的前面并没有数据的变化，因为数据还没有请求到，没有赋值给data，就不会有下次dom渲染之后的状态。所以，==使用`$nextTick`方法的前提是前面有数据变化，促使组件要执行更新阶段去更新渲染dom元素，然而没有更新那么快又要马上操作dom的时候，就要使用`$nextTick`方法。==
+
+          > 完美解决：那么我们就不能放在created和mounted去初始化实例，也不要放到updated里，因为只要页面依赖的data数据或者props数据或者计算属性变化都会去执行beforeUpdate和updated函数，那么将会重复实例化。
+          >
+          > 所以，要在watch侦听器里监听data的服务器请求到的数据，一旦这个数据变化，说明已经请求到数据了。但是请求到数据还要时间去渲染到页面，如果马上初始化实例，也是拿不到dom的。所以，要在数据变化之后，执行组件的更新阶段后，dom渲染出来了才去初始化。因此使用，`this.$nextTick(callback)`，里面的回调函数会在数据变化之后新的dom渲染后执行。
+          >
+          > ```js
+          > watch: {
+          >  // 监听data里的bannerList数据，变化说明已经请求到数据了
+          >  bannerList: {
+          >    handler(newValue, oldValue) {
+          >      this.$nextTick(function () {
+          >        // 初始化一个swiper实例对象。注意：必须先有dom结构才可以初始化，因为要操作dom
+          >        // 构造函数里的配置，需要到官网去看，不能随便乱写
+          >        var mySwiper = new Swiper(this.$refs.swiper, {
+          >          // direction: 'vertical', // 垂直切换选项(默认是水平模式)
+          >          loop: true, // 循环模式选项
+          >          // 如果需要分页器
+          >          pagination: {
+          >            el: '.swiper-pagination'
+          >          },
+          >          // 如果需要前进后退按钮
+          >          navigation: {
+          >            nextEl: '.swiper-button-next',
+          >            prevEl: '.swiper-button-prev'
+          >          }
+          >        })
+          >      })
+          >    }
+          >  }
+          > },
+          > ```
+          >
+          > `$nextTick(callback)`的详细解释：
+          >
+          > ![image-20220307234102221](img/image-20220307234102221.png)
+          
+       3. 如果初始化实例的地方和发起数据请求的不是同一个组件，且初始化实例的父组件在循环初始化实例的组件，则可以直接在mounted初始化实例。因为这个组件所依赖的数据是父组件，要先在父组件得到数据了且循环遍历了初始化实例的组件后，才会去执行渲染初始化实例的组件。
+       
+       
+
++ **抽取封装公共组件**
+
+  + 如果在项目开发中，发现一个组件是结构差不多，功能差不多，可以抽离成一个全局组件。
+
+    > 如在尚品汇中的首页的轮播图有三处，可以抽离成一个全局共用的组件。
+    >
+    > ```vue
+    > <template>
+    >   <div class="swiper-container" ref="swiper">
+    >     <div class="swiper-wrapper">
+    >       <div
+    >         class="swiper-slide"
+    >         v-for="carousel in imgs"
+    >         :key="carousel.id"
+    >       >
+    >         <img :src="carousel.imgUrl" />
+    >       </div>
+    >     </div>
+    >     <!-- 如果需要分页器 -->
+    >     <div class="swiper-pagination"></div>
+    > 
+    >     <!-- 如果需要导航按钮 -->
+    >     <div class="swiper-button-prev"></div>
+    >     <div class="swiper-button-next"></div>
+    >   </div>
+    > </template>
+    > 
+    > <script>
+    > import Swiper from 'swiper'
+    > export default {
+    >   name: 'Carousel',
+    >   props: ['imgs'],
+    >   mounted() {},
+    >   watch: {
+    >     imgs: {
+    >       handler(newValue, oldValue) {
+    >         this.$nextTick(function () {
+    >           const swiper = new Swiper(this.$refs.swiper, {
+    >             // direction: 'vertical', // 垂直切换选项(默认是水平模式)
+    >             loop: true, // 循环模式选项
+    >             // 如果需要分页器
+    >             pagination: {
+    >               el: '.swiper-pagination'
+    >             },
+    >             // 如果需要前进后退按钮
+    >             navigation: {
+    >               nextEl: '.swiper-button-next',
+    >               prevEl: '.swiper-button-prev'
+    >             }
+    >           })
+    >         })
+    >       },
+    >       immediate: true
+    >     }
+    >   }
+    > }
+    > </script>
+    > 
+    > <style></style>
+    > 
+    > ```
+
++ **使用搜索接口（根据请求的参数不同得到不同的数据）的经验总结**
+
+  + 使用搜索接口，刚开始可以先把请求体设为空对象去发起请求，那么得到的就是全部信息先在页面渲染出来，不然如果带条件去发起请求，有的可能没有数据，在页面就做不了渲染，看不到效果；或者自己去数据库添加数据。如果带条件去发起请求则会在全部信息的基础上做过滤。
+
+  + 如果接口的请求参数的某一参数非必须传，那么当你发起请求时，发送过去的参数有下面三种格式都表示没有传。比如，id可传可不传。
+
+    1. ```js
+       data() {
+           return {
+               obj: {
+                   // 虽然得到的结果和没传一样，但是实际是有发送给服务器的。
+                   id: ''
+               }
+           }
+       }
+       async getSearchInfo() {
+           const { data } = await getSearchInfo(this.obj)
+           
+         }
+       ```
+
+    2. ```js
+       data() {
+           return {
+               obj: {
+                   // 为undefined表示没传，没有发送给服务器这个参数。所以，如果以后要置空某个参数，直接赋值成undefined，比赋值成''性能更好
+                   id: undefined
+               }
+           }
+       }
+       async getSearchInfo() {
+           const { data } = await getSearchInfo(this.obj)
+           
+         }
+       ```
+
+    3. ```js
+       data() {
+           return {
+               obj: {
+                   // 没写更是没传
+                  
+               }
+           }
+       }
+       async getSearchInfo() {
+           const { data } = await getSearchInfo(this.obj)
+           
+         }
+       ```
+
+  + 发起请求，传递请求参数的步骤：
+
+    1. 先把所有的请求参数放到一个对象里，属性值都为空，代表没有传。
+
+       ```js
+         data() {
+           return {
+             searchParams: {
+               category1Id: '',
+               category2Id: '',
+               category3Id: '',
+               categoryName: '',
+               keyword: '',
+               order: '',
+               pageNo: 1,
+               pageSize: 10,
+               props: [],
+               trademark: ''
+             }
+           }
+         }
+       ```
+
+       
+
+    2. 然后在beforeMounte函数里整理请求参数。
+
+       ```js
+       // 发起请求之前记得整理请求参数
+         beforeMount() {
+       
+           // 合并对象的方法。后面的相同的对象的属性值会覆盖前面的。
+           Object.assign(this.searchParams, this.$route.query, this.$route.params)
+         }
+       ```
+
+       
+
+    3. 在mounted函数里发起请求。
+
+       ```js
+       mounted() {
+           // 请求的代码封装在函数里
+           this.initSearchInfo()
+         }
+       ```
+
+       
+
++ **初始化页面发起请求现在统一改过来，都在mounted里发起，不要在created里。两者效果都是一样的。但是在mounted里发起请求，还可以有beforeMount和created两个地方可以对data里的数据进行操作**
+
++ **Object.assign(target, ...)合并对象，可以用来整理请求参数**
+
+  ```js
+    let obj1 = {
+      id: '',
+      uname: '胡',
+      sex: ''
+    }
+    let obj2 = {
+      id: '222',
+      uname: '乔丹',
+      money: 'much'
+    }
+    let obj3 = {
+      id: '',
+      uname: '乔丹',
+     
+    }
+    // 合并对象，会把相同属性名给赋值过去到obj1。后面的会覆盖前面的。
+    Object.assign(obj1, obj2, obj3)
+    console.log(obj1); // {id: '', uname: '乔丹', sex: '', money: 'much'}
+  ```
+
++ **兄弟组件之间的通信--全局事件总线$bus**
+
+  1. 先在main.js的调用Vue构造函数里给Vue原型对象添加一个$bus属性，属性值为一个实例对象，那么所有的组件实例的$bus都是同一个实例对象。
+
+     ```js
+     new Vue({
+       router,
+       store,
+       // 全局事件总线$bus的配置
+       beforeCreate() {
+         Vue.prototype.$bus = this
+       },
+       render: (h) => h(App)
+     }).$mount('#app')
+     ```
+
+  2. 由于原型链的缘故，最后都可以找到$bus的属性。
+
+     ```js
+      // 全局事件总线，触发事件。同样可以传值，第二个参数是要传过去的数据。
+           this.$bus.$emit('clear')
+     ```
+
+  3. 在接受参数的组件的挂载完毕，监听事件。
+
+     ```js
+      mounted() {
+         // 监听clear事件
+         this.$bus.$on('clear', () => {
+           
+         })
+       },
+     ```
+
++ **搜索页面的综合和价格排序，动态添加类名的方式，值得一学。很多时候页面数据的展示都是数据驱动视图更新。**
+
++ **iconfont字体图标的详细使用步骤**
+
+  1. ![image-20220310192445659](img/image-20220310192445659.png)
+
+  2. ![image-20220310192609296](img/image-20220310192609296.png)
+
+  3. ![image-20220310192818546](img/image-20220310192818546.png)
+
+  4. ![image-20220310192928248](img/image-20220310192928248.png)
+
+  5. ![image-20220310193117824](img/image-20220310193117824.png)
+
+  6. ![image-20220310194505457](img/image-20220310194505457.png)
+
+  7. ![image-20220310194605193](img/image-20220310194605193.png)
+
+  8. 在public文件夹里的index.html文件里引入
+
+     ```html
+      <link rel="stylesheet" href="https://at.alicdn.com/t/font_3237420_tgamzid8bon.css">
+     ```
+
+  9. 去字体图标项目里复制图标名字，使用字体图标。
+
+     ```html
+     <i class="iconfont icon-long-arrow-down"></i>
+     
+     ```
+
++ **分页器组件（重要，要会自己封装）**
+
+  + 背景：如果是使用element ui等组件库，分页是很容易做。但是，如果不使用组件库，要会自己封装一个组件出来。
+
+  + 分页器组件
+
+    组件在封装时，最主要要得出连续的页码的开始页面和结束页码。根据这两个数可以去实现很多。显示的页码主要是靠连续的页码，第一页和最后一页和省略号只是衬托，时有时无。
+
+    ```vue
+    <template>
+      <div class="pagination">
+        <!-- 调试 -->
+        <!-- <h3>
+          start:{{ StartAndEnd.start }} end:{{ StartAndEnd.end }} 当前页：{{
+            pageNo
+          }}
+        </h3> -->
+    
+        <button
+          :disabled="pageNo === 1"
+          @click="$emit('changePage', pageNo - 1)"
+        >
+          上一页
+        </button>
+        <button v-if="StartAndEnd.start > 1" @click="$emit('changePage', 1)">
+          1
+        </button>
+        <button v-if="StartAndEnd.start > 2">···</button>
+    
+        <button
+          v-for="(num, index) in StartAndEnd.end"
+          :key="index"
+          v-show="num >= StartAndEnd.start"
+          :class="{ active: pageNo == num }"
+          :disabled="pageNo == num"
+          @click="$emit('changePage', num)"
+        >
+          {{ num }}
+        </button>
+    
+        <button v-if="StartAndEnd.end < totalPages - 1">···</button>
+        <button
+          v-if="StartAndEnd.end < totalPages"
+          @click="$emit('changePage', totalPages)"
+        >
+          {{ totalPages }}
+        </button>
+        <button
+          :disabled="pageNo === totalPages"
+          @click="$emit('changePage', pageNo + 1)"
+        >
+          下一页
+        </button>
+    
+        <button style="margin-left: 30px">共 {{ total }} 条</button>
+      </div>
+    </template>
+    
+    <script>
+    export default {
+      name: 'Pagination',
+      props: {
+        // 所有数据的总条数
+        total: {
+          required: true
+        },
+        // 每页的数据条数
+        pageSize: {
+          type: Number,
+          required: true
+        },
+        // 当前页码
+        pageNo: {
+          type: Number,
+          required: true
+        },
+        // 连续的页码的个数
+        continues: {
+          type: Number,
+          required: true
+        }
+      },
+      computed: {
+        // 总页数
+        totalPages() {
+          return Math.ceil(this.total / this.pageSize)
+        },
+        StartAndEnd() {
+          // 由于props的属性是组件实例的属性，可以直接解构赋值出来。省的每次使用都要加this
+          const { pageNo, continues, totalPages } = this
+    
+          let start = 0
+          let end = 0
+          // 如果连续的页码数大于总页数
+          if (totalPages < continues) {
+            start = 1
+            end = totalPages
+          } else {
+            start = pageNo - parseInt(continues / 2)
+            end = pageNo + parseInt(continues / 2)
+    
+            // 有可能出现start小于1的情况
+            if (start < 1) {
+              start = 1
+              end = continues
+            }
+    
+            if (end > totalPages) {
+              end = totalPages
+              start = totalPages - continues + 1
+            }
+          }
+    
+          return { start, end }
+        }
+      },
+      methods: {}
+    }
+    </script>
+    
+    <style lang="less" scoped>
+    .pagination {
+      text-align: center;
+      button {
+        margin: 0 5px;
+        background-color: #f4f4f5;
+        color: #606266;
+        outline: none;
+        border-radius: 2px;
+        padding: 0 4px;
+        vertical-align: top;
+        display: inline-block;
+        font-size: 13px;
+        min-width: 35.5px;
+        height: 28px;
+        line-height: 28px;
+        cursor: pointer;
+        box-sizing: border-box;
+        text-align: center;
+        border: 0;
+    
+        &[disabled] {
+          color: #c0c4cc;
+          cursor: not-allowed;
+        }
+    
+        &.active {
+          cursor: not-allowed;
+          background-color: #409eff;
+          color: #fff;
+        }
+      }
+    }
+    </style>
+    
+    ```
+
+    组件的使用
+
+    total：总的数据条数
+
+    pageSize：每页多少条数据
+
+    pageNo：当前在第几页
+
+    continues：连续的页码的个数
+
+    changePage事件：页码改变时触发，事件处理函数会注入改变后的页码。
+
+    ```html
+     // 这里的数据是死的，根据传入的数据可以显示不同的页码
+    <Pagination
+                :total="91"
+                :pageSize="10"
+                :pageNo="1"
+                :continues="5"
+                @changePage="changePage"
+              />
+    ```
+
++ **vue中的滚动行为**
+
+  使用前端路由，当切换到新路由时，想要页面滚到顶部
+
+  ```js
+  const router = new VueRouter({
+    routes,
+    scrollBehavior(to, from, savedPosition) {
+      return { x: 0, y: 0 }
+    }
+  })
+  ```
+
++ **vue组件实例基于data,props,compunted属性的数据去渲染的过程**
+
+  1. 如果组件里的data,props,compunted有初始的数据，组件被使用，开始生命周期，第一次渲染挂载完成是基于原始数据去生成模板挂载到浏览器页面。
+
+  2. 然后发起请求，把请求到的数据赋值给data，props，compunted，就是相当于改变了数据，页面开始更新，进入更新前和更新后生命周期。
+
+  3. 所以，如果要使用data的数据（这些数据是服务器返回的）去遍历，去拿取里面的属性值，那么在服务器返回之前，第一次渲染时，要给个初始值，如空数组，空对象。有时候要使用或，如vuex里的getters。有时候要在计算属性里去重新操作属性，设置个或的情况。
+
+     > 注意：虽然这种报错不会影响程序运行，但是要知道怎么回事，最好解决下。
+
++ **写结构时注意，诸如下面这种样式，都是最外层是数组，数组套对象。对象的某个属性值是数组，数组又套对象。对象又套数组。所以，写结构时只要写最外面的数组的一个元素的数据的结构，以后得到服务器的数据都是直接遍历**
+
+  ![image-20220312153614577](img/image-20220312153614577.png)
+
+  ![image-20220312153654535](img/image-20220312153654535.png)
+
++ **判断一个数据是否数字**
+
+  + 通过`isNaN(数据)`，如果返回值是true，则不是数字。反之，则是数字。是window的方法，直接用。
+
++ **每次发起请求之后，都判断下code===200，代表成功再去处理成功之后的事。因为有时候返回的状态码是比如201开头的，是不会走请求拦截器里的响应失败的回调函数，那么就不会返回promise失败，那么仍然会走await后面的代码，因为使用async await就是替代then，await后面的代码就是原本写在then里面的成功之后的回调。如果使用async await非要捕捉失败的走哪里，使用try{}catch(e){}。所以，await 后面要接Promise实例对象；async后面接方法或者函数。**
+
+  ```js
+   async function test() {
+  
+      // 下面这个await接的可以当成是一个请求
+      const result = await getInfo()
+  
+      // 因为有时候后端返回的201，但是这也是请求出错。但是不会走响应拦截器的响应失败的回调。
+      // 就不会返回失败。所以每次请求完了之后都养成好习惯，判断一下。不然成功和失败都会走后面的代码。
+      if(result.code === 200) {
+  
+        // 这个可以看成resolve('ok')
+        return 'ok'
+      }else{
+        // 可以看成reject()
+        return Promise.reject(new Error('faile'))
+      }
+  
+    } 
+  
+    // async函数调用时，会返回Promise.
+  
+  
+    // 当我们在比如mounted调用时，可以继续使用async await 
+    // 下面是伪代码
+    async mounted() {
+      try {
+        await this.test()
+        // 成功后走这里
+      } catch (error) {
+        // 失败走这里
+      }
+    }
+  
+   
+   
+  
+  ```
+
+  > 上面之所以要return成功还是失败，是因为请求失败没有标志失败，那么默认就是成功的。那么我们就无法判断是成功还是失败。如果请求失败状态码是大于2开头就会有失败标志，那么就可以捕捉到。
+  
++ **Promise的注意点**
+
+  + 每次then方法之前必须接一个返回值为Promise的实例。因为只有前面的Promise实例标志了成功了或者失败了，才会走then里面成功或者失败的回调，不然就不走，停住。一旦then前面接的不是一个Promise实例，就无法标志是成功了还是失败了，那么前面的失败回调执行了，后面的then还是会执行成功的回调，那就是事与愿违了。因为我们使用Promise就是为了前面成功了才做什么，失败了又做什么。
+
+  + 每一个Promise实例必须标明是失败了还是成功了，否则后面的回调就不会走。
+
+  + 由于then方法的返回值也是Promise示例，所以可以给它标志个成功还是失败的，如果不标志默认是成功的。
+
+  + 如果then了很多次都没写失败回调去捕捉错误，某一处的失败了，只要有一个地方写失败的回调就可以捕捉错误，即使间隔了很多个then。
+
+  + ==每一个Promise实例都必须返回一个成功或者失败，否则默认是成功的。==
+
+    
+
+    ```js
+      new Promise((resolve, reject) => {
+        // 每一个Promise实例必须标明是失败了还是成功了，否则后面的回调就不会走
+        if(0) {
+          resolve(1)
+        } else{
+          reject(0)
+        }
+        
+      }).then((v) => {
+        console.log(v);
+        // 每次Promise都必须说是成功还是失败了
+        return 'ok'
+      }, (err) => {
+        console.log(err);
+        // 表示失败了
+        return Promise.reject(new Error('faile'))
+      }).then((v) => {
+        console.log(v);
+        // 最后一步就没必要说是成功还是失败了
+      }, (err) => {
+        console.log(err);
+      })
+    
+    ```
+
++ **Promise.all(arr)**
+
+  + 作用：
+
+    + Promise.all()返回值是一个Promise实例。
+
+    + 如果数组元素里的Promise实例，实例都是是成功的，那么Promise.all()返回值的Promise实例就是成功。
+
+    + 如果数组元素里的Promise实例，只要一个实例是失败的，那么Promise.all()返回值的Promise实例就是失败。
+
+      ```js
+      let arr = []
+        for(let i = 0; i < 5; i++) {
+          let promise = new Promise((resolve, reject) => {
+            resolve()
+          })
+          arr.push(promise)
+        }
+      
+        // 方式一：
+        // Promise.all(arr).then(() => {
+        //   console.log('成功');
+        // }, () => {
+        //   console.log('失败');
+        // }) 
+        // 结果是成功
+      
+      
+      
+        // 方式二：
+        (async function() {
+          try {
+            await Promise.all(arr)
+            console.log('成功');
+          } catch (error) {
+            console.log('失败');
+          }
+          
+        })()
+        // 结果：成功
+      
+      ```
+
+      
+
++ **本地存储和会话存储**
+
+  + 背景：路由传参时尽量传写简单的数据就好了，虽然传复杂数据也可以用，但是在地址栏会比较难看。可以借用本地存储。
+
+  + 本地存储，会话存储时H5新增的。只能存字符串。要先把要存的数据转为字符串再存，取出来还要转为想要的数据格式。
+
+    ```js
+    ```
+
+    
+
+  + 本地存储：持久化，有上限。
+
+  + 会话存储：非持久化，会话结束后就消失，即页面关闭。
+
++ **面试题：H5中新增了哪些**
+
+  + 语义化标签。
+  + css：animation，transform等css3.
+  + 本地存储，会话存储。
+  + 多媒体功能，audio，video标签。
+  + 画布:canvas
+
++ **uuid游客身份**
+
+  为什么需要uuid？
+
+  + uuid是一个插件，可以随机生成一个字符串，以此字符串来代替token，表名这个游客的身份。因为token只有登录的时候才会有，而游客是没有登录的。而没有登录状态下，有的页面都是所有的游客返回的数据都是相同的，因此就不需要游客身份。而有的页面是游客之间是数据不同的，如购物车。当没有登录时，浏览首页，可能所有的游客的数据都是一样，不需要标志游客身份；当浏览时，添加某个商品到购物车，不同的游客添加的数据肯定不一样，当进入到购物车页面就要返回当前这个游客的购物车信息，然而当我们在添加到购物车发送请求时没有标志游客发送给服务器，那么当我们请求购物车信息就不知道要返回哪个游客的信息。因此，没有登录时，我们在发起请求的时候就要在请求模块里判断，如果有游客的身份码，就要在请求头里添加发送过去（注意，请求头的属性要和后端商量好，不能瞎写），那么服务器就知道了发送过去的请求是谁的，下次要获取那一条信息，根据游客身份码就返回那个游客的数据。
+  + 发送过去的uuid是前端生成，而token是后端返回给我们的。
+  + 不管是游客uuid，还是token，都统一放到vuex仓库中。因为vuex中的数据是响应式的，且是所有的组件共享。
+  + uuid和token要存在本地存储localStorage，持久化。因为vuex中的数据不是持久化的，一刷新页面token就会消失。所以刚开始获取到token和uuid的时候就要立马存到本地存储。存在vuex中的token和uuid都要通过本地去获取。
+
+  uuid的使用
+
+  1. 正常node_module里就已经下载好了，因为有的依赖它。如果没有在自己下载。`npm i uuid`
+
+  2. ```js
+     import { v4 as uuidv4 } from 'uuid';
+     // 只要调用这个函数，就会自动生成随机字符串，不会重复
+     uuidv4(); // ⇨ '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
+     ```
+
+  项目中给游客设置uuid
+
+  1. 封装一个工具模块，放到until文件夹里。
+
+     ```js
+     import { v4 as uuidv4 } from 'uuid'
+     
+     export const uuidToken = () => {
+       let uuidToken = localStorage.getItem('UUIDTOKEN')
+       if (!uuidToken) {
+         uuidToken = uuidv4()
+         localStorage.setItem('UUIDTOKEN', uuidToken)
+       }
+       return uuidToken
+     }
+     
+     ```
+
+  2. 在vuex中调用暴露的函数，存放vuex中。
+
+     ```js
+     import { uuidToken } from '@/utils/uuid_token.js'
+     const state = {
+       uuidToken: uuidToken()
+     }
+     ```
+
+  3. 在请求拦截器里设置，请求头，请求头的存放uuid的属性要和后端商量。
+
+     ```js
+     // 配置请求拦截器
+     request.interceptors.request.use(
+       (config) => {
+        
+         // 给游客设置身份令牌，uuid
+         // 如果有uuid说明没有登录，才设置。如果没有表明已经登陆了，则不需要设置。
+         if (store.state.detail.uuidToken) {
+           config.headers.userTempId = store.state.detail.uuidToken
+         }
+     
+         return config
+       },
+       (e) => {
+         // 请求失败之后会走这个回调
+         return Promise.reject(e)
+       }
+     )
+     
+     ```
+
++ **全局前置守卫：只要路由跳转之前都要经过这个回调函数。**
+
++ **路由独享守卫：特定某个路由的守卫**
+
++ **登录退出的业务逻辑**
+
+  + 用户登录
+
+    1. 先去注册发起请求，有了账号。
+    2. 根据注册好了的账号，密码，去登录发起请求。服务器会返回当前这个账号的token，并把这个token赋值给vuex，且存入到本地存储持久化，防止刷新页面token就不见了。然后跳转到首页。
+    3. 用户进入到首页之前要在全局前置守卫根据vuex仓库中的token去发起请求获取用户信息，并且展示到页面顶部。一旦登录了，就不能在url上改变hash去到登录页面，要在全局前置守卫判断。
+
+  + 用户退出
+
+    1. 当用户点击退出按钮，就要发起请求，把当前的token给失效掉，且清除本地的token和vuex的token，回到登录页面或者游客身份的首页（看业务需求）。不然不发起请求失效token的话，如果在未退出之前在浏览器的Application里保存了token，即使你退出了，那么别有用心的人可以在浏览器里手动输入已经保存的token，那就会直接进入到已经登录的首页。
+
+  + 用户已经登录了，但是没有点击退出登录
+
+    1. 那样子token就会一直在本地且没有发起请求失效。那是不是就永久不用登陆了？
+
+       答： 不是的。由于已经在全局前置守卫设置了，去到首页等其他需要登录才可以进入的页面之前都要拿本地的token去发起请求得到用户的信息，如果请求成功，说明token未过期，可以直接跳转到首页；如果请求失败，说明token已经过期，那么就会跳转到登录页面重新发起请求，获取新的token。
+
+  > 全局前置守卫应该做的事
+  >
+  > ==：最外层判断登录和未登录，里层去判断需要登录的组件和不需要登录的组件：==
+  >
+  > ```js
+  > router.beforeEach(async (to, from, next) => {
+  >   const token = store.state.login.token
+  > 
+  >   if (token) {
+  >     // 如果有token，就要判断有没有过期。通过发起请求看能不能得到用户信息，可以就是没有过期。
+  >     try {
+  >       await store.dispatch('getUserInfo')
+  >       // 请求成功，说明已经登录
+  >       // 已经登录就不能跳转到登录页面和注册页面，直接到首页
+  >       if (to.meta.needLogout) {
+  >         next('/home')
+  >       } else {
+  >         next()
+  >       }
+  >     } catch (e) {
+  >       // 请求失败，说明token过期。可能是没有点击退出登录，过段时间打开页面token还在本地，但是肯定没有用户信息，
+  >       // 因为信息在vuex中不是持久化的；也可能是用户一直在浏览页面或者没关闭，由于时间太长过期了，那么vuex中
+  >       // 只要没有刷新，还会有数据，要把这些数据给清空，把vuex中的token和本地的token清掉。跳转到首页。
+  >       localStorage.removeItem('USERTOKEN')
+  >       store.state.login.token = ''
+  >       // 因为空对象也是真，所以看看能不能拿到属性
+  >       if (store.state.login.userInfo.loginName) {
+  >         store.state.login.userInfo = {}
+  >       }
+  >       next('/home')
+  >     }
+  >   } else {
+  >     // 没有token，就是没登录
+  >     next()
+  >   }
+  > })
+  > ```
+  >
+  > 
+  >
+  > > 注意：如果已经登录，用户没有退出，在规定时间内，即token，打开页面可以直接到已经登录状态的话，把token存到localStorage。
+  > >
+  > > 如果只要用户关闭网页，不管有没有退出登录，都要重新登录的话，就把token存到sessionStorage。
+  > >
+  > > 判断有登陆没登录是为了在顶部展示用户信息。
+  > >
+  > > 
+  >
+  > 
+
++ **数组的every方法和some方法**
+
+  + ```js
+      let arr = [5,2,3,6]
+      
+      // 判断数组每一个元素是否都是大于1
+      let bool = arr.every(item => {
+        return item > 1
+      })
+      console.log(bool); // true
+      ```
+
+  + ```js
+    
+       let arr = [5,2,3,60]
+          
+        // 判断数组是否其中一个元素大于10，只要一个即可
+        let bool = arr.some(item => {
+          return item > 10
+        })
+        console.log(bool); // true  
+    ```
+
++ **在css中使用@一定要在前面加~**
+
++ **assets是放静态资源的地方，可以放组件共享的图片**
+
++ **统一导入请求的API**
+
+  + 背景：
+
+    1. 如果使用vuex，那么可以分模块存储数据和发送请求，也就是发送请求也是vuex中。那么使用某个API，只要按需导入一次，在actions里封装请求的行为，最后就可以全局派发这个行为。
+
+    2. 如果是不使用vuex，那么数据存储要在组件的data，发送请求也是在methods里封装好函数。如果某一个请求API要在多个组件里被使用，那么就要多次导入。
+
+       > 背景2的解决：
+       >
+       > 可以在main.js导入一次全部的API，并且作为Vue构造函数的原型对象的属性，由于组件实例的原型的原型，也就是原型链查找规则，最终组件实例的属性会找到这个属性。原理是跟$bus一样的。
+       >
+       > ```js
+       > // 一次性导入全部的API。按需导出时，可以有按需导入和全部导入两种方式。
+       > import * as API from '@/api/'
+       > 
+       > new Vue({
+       >   router,
+       >   store,
+       >   // 全局事件总线$bus的配置
+       >   beforeCreate() {
+       >     Vue.prototype.$bus = this
+       >     Vue.prototype.$API = API
+       >   },
+       >   render: (h) => h(App)
+       > }).$mount('#app')
+       > ```
+       >
+       > 所有的组件实例这样子使用api即可，不用再次导入：`this.$API.getUserInfo() `
+
++ **不要给生命周期函数使用async await，可以去methods封装一个函数，在函数那里使用**
+
++ **element-ui组件库的注意点**
+
+  1. 如果需要使用很多组件可以全部导入。否则就按需导入，但是按需导入需要下载插件并配置文件，去文档看。
+  2. 如果是按需导入，使用Vue.component()或Vue.use注册的组件，使用时是以标签的形式使用的。如果以Vue.prototype.xx=xx，则组件的使用是以代码的形式，说白了就是调用函数，函数执行操作dom。
+
++ **扫码支付业务逻辑**
+
+  1. 由于根据订单信息发送到后端得到的是二维码字符串，需要借助插件转化成图片地址。
+
+     ```js
+     npm i qrcode -S
+     ```
+
+  2. 具体使用去npm文档看。
+
+  
+
++ ![image-20220315201722758](img/image-20220315201722758.png)
+
++ **登录和未登录的路由跳转业务逻辑（在全局前置守卫判断）**
+
+  + 已经登录了，有的路由组件不能跳转，如果修改地址栏的hash，可以直接重定向跳转到首页。
+
+  + 未登录，有的路由组件不能跳转，需要先登录再跳转。所以，要先跳转到登录页面，然后把要去的页面给保存着，登录完成了就跳到之前想去的页面。如，未登录，我点击我的订单按钮，但是未登录不可以跳，所以先到登录页面，点击登录之后就到我的订单。
+
+    在全局前置守卫判断
+
+    ```js
+    if(token) {
+        xxxxx
+    }else {
+        
+        // 没有token，就是没登录。没有登录想去我的订单，导航到登录页并把想去的路径给带过去。
+        if (to.path === '/center') {
+          // 通过路由传参保存着想去的地方
+          next('/login?redirect=' + to.path)
+        }
+        next()
+      
+    }
+    ```
+
+    在登录按钮点击之后
+
+    ```js
+     // 判断有没有需要重定向的，有的话就到那里，没有的话就到首页。
+              const toPath = this.$route.query.redirect || '/home'
+              this.$router.push(toPath)
+    ```
+
++ **全局前置守卫，路由独享守卫**
+
+  + 全局前置守卫：全局就是指所有的路由，前置就是跳转之前，守卫就是会先拦截，先执行回调函数。
+
+  + 路由独享守卫：只是负责某个路由跳转前的拦截，写在路由配置的地方。
+
+    应用：一般是当在全局前置守卫判断完是否需要登录才可以跳转时，接着判断小范围的。比如，当支付结果页面是需要登录才可以跳转，但是如果是还没支付就从首页跳转到支付页面是不可以的，这时可以使用路由独享守卫。
+
+    ```js
+     {
+        path: '/center',
+        name: 'center',
+        component: () => import('@/views/Center/'),
+        beforeEnter: (to, from, next) => {
+          // ...
+        }
+      }
+    ```
+
+  + 组件内守卫：写在组件内，跟生命周期同级。有三个阶段，1. 路由跳转去这个组件之前触发。2. 这个组件更新后触发，是同一个路由组件，但是由于路由传参的不同，渲染数据不同，即多个hash对应同一个路由组件。3. 路由组件跳转之后触发。
+    + 具体需要用时详细看文档，用的比较少。
+
+  
+
+  > 其实，全局前置守卫可以实现路由独享守卫的逻辑，只是全局的要不停的判断，代码量会写的比较多，而路由独享的，比较明确，思路清晰。
+
++ **Vue插件**
+
+  + 结合尚硅谷的vue项目实战106集和禹哥视频一起看，有一个自定义指令修饰符的东西。
+
++ **图片懒加载**
+
+  + 如果网络请求慢了，图片先以指定的图片显示，等加载完毕了再替换成服务器返回的图片。
+
+    1. `npm i vue-lazyload -S`
+
+    2. 在main.js里导入插件并安装插件：
+
+       ```js
+       import VueLazyload from 'vue-lazyload'
+       // 图片和json文件是不用导出的，会自动导出
+       import aoteman from '@/assets/images/1.jpg'
+       // 安装插件，并传入配置项
+       Vue.use(VueLazyload, {
+         
+         loading: aoteman
+       })
+       
+       ```
+
+    3. 在组件里可以以全局的自定义指令使用。因为插件里的代码就是写了一个全局的自定义指令。
+
+       ```html
+       <img v-lazy="good.defaultImg"/>
+       ```
+
+       
+
++ **表单验证(使用vee-validate插件)**
+
+  + 以后工作的时候经常会进行表单验证【element-ui】进行表单验证，so 简单。
+
+  + vee-validate插件：Vue官方提供的一个表单验证的插件。这个插件很难用：如果你翻看它的文档（看一个月：不保证能看懂），依赖文件很多（文档书写的很难理解）花大量时间学习，很难搞懂。哪怕将来工作了，真的使用vee-valadiate。改下面的代码即可。
+
+    1. `npm i vee-validate@2 -S`，这个版本的比较简单易用。
+
+    2. 在main.js（或者可以独立写一个模块，到时候再引入main.js文件中让它执行即可）
+
+       ```js
+       import VeeValidate from 'vee-validate'
+       import zh_CN from 'vee-validate/dist/locale/zh_CN'   // 引入中文 message
+       Vue.use(VeeValidate)
+       
+       VeeValidate.Validator.localize('zh_CN', {
+         messages: {
+           ...zh_CN.messages,
+           is: (field) => `${field}必须与密码相同` // 修改内置规则的 message，让确认密码和密码相同
+         },
+         attributes: { // 给校验的 field 属性名映射中文名称
+           phone: '手机号',
+           code: '验证码',
+           password: '密码',
+           password1: '确认密码',
+           agree: '协议'
+         }
+       })
+       
+       // 自定义校验规则，检验规则可以是正则，也可以不是。
+       VeeValidate.Validator.extend('agree', {
+         validate: value => {
+           // value是表单输入的内容，最终返回值要布尔值表明是否校验成功。
+           return value
+         },
+         getMessage: field => field + '必须同意'
+       })
+       ```
+
+       在组件中的使用
+
+       ```vue
+       <template>
+         <div>
+       
+           <div>
+              <input
+                 placeholder="请输入你的手机号"
+                 v-model="phone"
+                 name="phone"
+                 v-validate="{ required: true, regex: /^1\d{10}$/ }"
+                 :class="{ invalid: errors.has('phone') }"
+       
+               />
+               <span >{{ errors.first("phone") }}</span>
+           </div>
+       
+           <div>
+             <input
+                 placeholder="请输入验证码"
+                 v-model="code"
+                 name="code"
+                 v-validate="{ required: true, regex: /^\d{6}$/ }"
+                 :class="{ invalid: errors.has('code') }"
+       
+               />
+               <span >{{ errors.first("code") }}</span>
+               <button @click="getCode">获取验证码</button>
+           </div>
+       
+           <div>
+             <input
+                 placeholder="请输入密码"
+                 v-model="password"
+                 name="password"
+                 v-validate="{ required: true, regex: /^\d{8}$/ }"
+                 :class="{ invalid: errors.has('password') }"
+       
+               />
+               <span >{{ errors.first("password") }}</span>
+           </div>
+       
+           <div>
+             <input
+                 placeholder="请输入确认密码"
+                 v-model="password1"
+                 name="password1"
+                 v-validate="{ required: true, is: password}"
+                 :class="{ invalid: errors.has('password1') }"
+       
+               />
+               <span >{{ errors.first("password1") }}</span>
+           </div>
+       
+           <div>
+             <input
+                type="checkbox"
+                 v-model="agree"
+                 name="agree"
+                 v-validate="{ required: true, agree: true}"
+                 :class="{ invalid: errors.has('agree') }"
+       
+               />
+               <span >{{ errors.first("agree") }}</span>
+           </div>
+       
+               <div><button @click="btn">注册</button></div>
+         </div>
+       </template>
+       
+       <script>
+       export default {
+         data() {
+           return {
+             phone: '',
+             code: '',
+             password: '',
+             password1: '',
+             agree: false
+           }
+         },
+         methods: {
+           async btn() {
+             // 校验全部的
+             const flag = await this.$validator.validateAll()
+             if (flag) {
+               // alert('全部校验正确')
+             } else {
+               // alert('校验失败')
+             }
+           },
+           async getCode() {
+             // 获取验证码之前先只检验输入的手机号是否正确（部分校验）
+             // 由于promise都要有返回是成功还是失败的，如果没有特意设置失败，则返回的都是成功的。
+             // 因此都是在成功的回调里写代码。
+             // 所以通过async await接受返回的值。
+       
+             const flag = await this.$validator.validate('phone')
+             if (flag) {
+               // alert('验证成功，可以发起请求')
+             } else {
+               // alert('验证失败')
+             }
+           }
+         }
+       }
+       </script>
+       
+       <style>
+       
+       </style>
+       ```
+
++ **路由懒加载**
+
+  + 当路由组件被使用时才加载。
+
+    ```js
+    {
+        path: '/center',
+        name: 'center',
+        component: () => import('@/views/Center/')
+    
+      }
+    ```
+
++ **处理打包后有map文件问题**
+
+  + 打包后map文件的作用：打包后的文件都是经过打包加密的，如果运行出错，就不知道哪一行报错，有了map文件就可以知道是哪一行报错。
+
+  + 去掉map文件：`vue.config.js`配置文件：
+
+    ```js
+    productionSourceMap: false
+    ```
+
++ **购买服务器**
+
+  + 可以买阿里云或者腾讯云。
+
+  + 以腾讯云为例：
+
+    1. 购买完服务器之后，去控制台 => 云产品 => 云服务器。
+
+    2. 可以自己设置密码。
+
+    3. 开通安全组，即放通端口号。
+
+    4. 利用xshell或xftp登录服务器且上传文件部署到服务器，==xshell可以直接通过命令行上传文件到服务器，但是没有学，以后有机会学一下。xftp是通过可视化的方式上传文件到服务器==
+
+       下面是xshell的常规操作：
+
+       1. ![image-20220317153701275](img/image-20220317153701275.png)
+
+       2. 上面点击连接之后，就会跳出个界面让你登录服务器的账户名（默认都是root）和服务器的密码。
+
+       3. 登录完了之后，就会跳出这个界面，就是表示登录到你的服务器，默认打开的是==家目录~==。因为只有家目录你可以访问。
+
+       4. 以下是常用的linux的命令：
+
+          1. `cd`：更改目录，change directory。
+
+             ![image-20220317154810166](img/image-20220317154810166.png)
+
+          2. `ls`：查看当前目录里的文件或者文件夹。
+
+             ![image-20220317155009176](img/image-20220317155009176.png)
+
+          3. `mkdir 目录`：新建文件夹。
+
+             ![image-20220317155245044](img/image-20220317155245044.png)
+
+          4. `pwd`：查看当前所处的绝对路径。
+
+             ![image-20220317155446783](img/image-20220317155446783.png)
+
+          
+
+          
+
+       下面是xftp的可视化上传文件到服务器操作：
+
+       1. ![image-20220317160215986](img/image-20220317160215986.png)
+
+       2. ![image-20220317160701740](img/image-20220317160701740.png)
+
+       3. 可以直接在这里做可视化的新建目录等操作，且上传文件到服务器。
+
+          ![image-20220317182516739](img/image-20220317182516739.png)
+
+       
+
+
++ **nginx反向代理（解决服务端跨域和访问服务器从/根目录直接跳转到自己项目的目录）**
+
+  + proxy跨域代理作用（Vue 设置代理实现本地跨域）：如果在开发过程中，后端没有开启cors跨域资源共享，那么浏览器会在访问数据时出现跨域现象，所以可以使用proxy代理解决，一旦在本地使用了proxy本地代理，就要在服务器使用nginx反向代理。webpack在打包时就会把http://localhost:8080替换成配置文件里的真实访问路径。但是一旦项目部署上线webpack的vue.config.js文件就不起作用了，只在开发环境起作用。所以，上线时在服务器去处理，要用nginx去处理。
+
+    在vue.config.js如下实现本地跨域
+
+    ```js
+    module.exports = {
+      devServer: {
+        proxy: {
+          '/api': {
+            target: 'http://39.98.123.211',
+            ws: true,
+            changeOrigin: true,
+            pathRewrite: {
+              '^/api': ''
+             }
+          }
+        }
+      }
+    }
+    
+    ```
+
+    那么在服务器的nginx文件夹里的nginx.conf文件里就要如下实行反向代理（与上面对应）注意：==要在xshell一个字母的一个字母敲出来，不能复制，因为windows系统的空格和Linux系统的空格不一样==：
+
+    ```js
+           location /api {
+    
+                    rewrite ^.+api/?(.*)$ /$1 break;
+    
+                    include uwsgi_params;
+    
+                    proxy_pass http://39.98.123.211;
+    
+            }
+    ```
+
+    
+
+  + nginx反向代理作用（解决上线时跨域，实现服务端跨域）：
+
+    + 由于当我们把项目部署到服务器之后，用户访问服务器的ip地址或者域名是相当于访问服务器的/根目录的。因此，可以通过nginx配置把访问服务器/根目录重定向到项目所在的目录里，然后就会自动访问index.html。
+    + 帮我们部署在服务器的项目访问的数据的服务器的ip地址改成真正的需要访问的ip地址，因为上线了vue.config.js就不起作用了，替换不了http://localhost:8080，通过反向代理处理。
+
+  + nginx配置具体操作（反向代理在xshell操作，文件上传到服务器xftp操作）
+
+    1. 使用xshell（只能使用xshell，因为需要命令行的方式安装nginx）打开根目录下的etc目录。
+
+    2. 在etc目录下，第一次配置nginx需要先新建一个nginx目录。
+
+    3. 打开nginx目录，在此目录里的命令行下载nginx，因为我们xshell连接登录的是服务器，所以是下载到服务器里的：`yum install nginx`。
+
+    4. 安装好nginx之后，在nginx目录里会发现nginx.conf文件。
+
+    5. 在nginx目录里，运行`vim nginx.conf`进行编辑。按`insert`键是插入编辑，编辑好了之后按`esc`，然后`:wq`保存并退出。
+
+       编辑内容有两个：
+
+       + 
+
+         ```js
+         server {
+                 listen       80;
+                 listen       [::]:80;
+                 server_name  _;
+                 root         /usr/share/nginx/html;
+         
+                 # Load configuration files for the default server block.
+                 include /etc/nginx/default.d/*.conf;
+                 
+                 
+                 
+                 
+                 
+              // 解决从/根目录跳到项目目录
+                 location / {
+                   root /root/hlbin/shangpinhui/dist;
+                   index index.html;
+                   try_files $uri $uri/ /index.html;
+                 }
+               // 解决服务端跨域
+                 location /api {
+         				// 如果在vue.config.js有设置路径重写才设置这个
+                         rewrite ^.+api/?(.*)$ /$1 break;
+         				// 这个应该可有可无，如果配置出错把这个去掉看看
+                         include uwsgi_params;
+         
+                         proxy_pass http://39.98.123.211;
+         
+                 }
+                 
+                 
+                 
+                 
+                 error_page 404 /404.html;
+                 location = /404.html {
+                 }
+         
+                 error_page 500 502 503 504 /50x.html;
+                 location = /50x.html {
+                 }
+             }
+         ```
+
+    6. `service nginx start`让nginx服务器跑起来，开始做代理的任务。
+
+       > `service nginx restart`：nginx服务器重启。
+       >
+       > `service nginx stop`：nginx服务器关闭。每次要配置nginx时应该要关闭下，配置好了再启动。
+
+       
+
++ **组件通信**
+
+  1. 自定义属性（主要是父向子传值）
+
+     1. 如果通过props父向子传递的是函数，且函数有形参，那么当子组件在调用传递过来的函数时传递实参，等于是子向父传值。
+     2. 如果通过props传递的是除了函数之外的数据，就是父向子传值。
+     3. 路由传递参数也可以传递props数据。
+
+  2. 自定义事件（子向父传值）
+
+     + 事件（必须有事件源，事件类型，事件回调）
+
+       + 系统事件：单击事件，双击事件，鼠标事件，键盘事件等等。
+       + 自定义事件。
+
+     + 原生的DOM绑定事件和组件标签绑定事件的区别：
+
+       + 原生DOM绑定的原生的系统事件是会触发事件的。如果给原生dom绑定自定义事件是没有意义的，因为你没办法通过$emit去触发事件，所以原生dom只绑定原生事件。
+
+       + 而组件标签绑定的事件默认是自定义事件，就算事件类型是系统原生事件也是默认自定义事件，除非给事件加`.native`事件修饰符就会变成原生事件，native事件修饰符原理是把原生事件绑定到组件里的根节点上的，因此点击组件内的任何dom都会触发事件，会产生事件冒泡，形成了事件委托。
+
+         ```html
+         <template>
+           <div>
+             <!-- 原生dom绑定原生系统事件，点击会触发事件 -->
+             <button @click="handler">点击</button>
+         
+             <!-- 组件标签绑定原生系统事件，点击不触发事件 -->
+             <EventTest @click="handler2"></EventTest>
+           </div>
+         </template>
+         ```
+
+         
+
+  3. 全局事件总线（$bus，用于兄弟组件之间的传值，万能的）
+
+  4. pubsub-js（在react用的比较多，vue中比较少用，万能的）
+
+  5. vuex（万能的）
+
+  6. 插槽（父子组件之间的通信）
+
++ **v-model的作用**
+
+  + 作用一：和表单标签一起使用，可以做数据的双向绑定，所谓的双向绑定就是data里的数据和表单里的数据保持同步，保持一样。
+
+  + 作用二（属于组件通信）：v-model用在组件标签上，使父子组件数据保持同步。使用场景：要对从父组件传入的数据在子组件做操作（==如果要在父组件做操作就不用使用v-mode了，因为数据就是从父组件传入给子组件，父改变了，子就会跟着改变，所以本质上props传入的数据只是单方向的同步。使用v-model就是保持了双向同步，即子组件改变了，父组件也会跟着改。==），可以看成是对于传入的数据在子组件做改变，也要使父组件的数据保持同步。本质上是通过自定义事件去父组件修改传入的数据，间接改变子组件的数据，这样子就实现了父子组件数据的同步。
+
+    + 背景：使用props把父组件的数据传入给子组件，这个数据在父子组件之间必须保持同步。如果传入的数据是基本数据类型，那么如果直接在子组件里修改这个数据，就会使父组件里的这个数据与之无法保持同步，就会报错。如果传入的数据是引用数据类型，则因为父子组件共用的是同一个引用类型数据的地址，都指向同一个数据，只要在子组件里不改变引用类型的地址就可以保持数据同步。
+
+    + 如果要使传递过去的数据在父子组件之间保持同步，就可以使用自定义属性配合自定义事件。可以使用v-model作为简写，在子组件里仍然要接受value的props数据和触发自定义事件input。(==归根结底就是从源头上改变props的数据，就可以保持数据的同步。由于props的数据是父向子传值，那么就要通过子向父传值去改变父组件的数据==)
+
+      父组件
+
+      ```vue
+      <template>
+        <div>
+          <h1>父组件</h1>
+          <!-- 这是组件标签，value是自定义属性。input是自定义事件 -->
+          <!-- <EventTest :value="msg" @input="msg=$event"></EventTest> -->
+      
+          <!-- 下面是上面的简写，仅此而已 -->
+          <EventTest v-model="msg"></EventTest>
+        </div>
+      </template>
+      
+      <script>
+      import EventTest from '@/components/EventTest/'
+      
+      export default {
+        data() {
+          return {
+            msg: '胡鹭斌'
+          }
+        },
+        components: {
+          EventTest
+        }
+      }
+      </script>
+      
+      <style>
+      
+      </style>
+      ```
+
+      子组件
+
+      ```vue
+      <template>
+        <div>
+          <h1>EventTest</h1>
+          <button @click="change">点击改变</button>
+        </div>
+      </template>
+      
+      <script>
+      export default {
+        data() {
+          return {
+            a: 1
+          }
+        },
+        // 自定义属性
+        props: ['value'],
+        methods: {
+          change() {
+            // 不能直接改value这个自定义属性，先把它赋值给data的数据在做修改
+            this.a = this.value
+            this.a = 0
+            // 自定义事件去改变传过来的数据，由于在源头改变传过来的数据，就是间接的改变子组件里的props数据，那就保持同步了
+            this.$emit('input', 0)
+          }
+        }
+      
+      }
+      </script>
+      
+      <style>
+      
+      </style>
+      ```
+
+      
+
+  > 1. 不用v-model，可以使用绑定属性value和绑定事件inpu做数据的双向绑定。
+  >
+  >    ```vue
+  >    <input :value="msg" @input="msg=$event.target.value">
+  >       
+  >    data() {
+  >    return {
+  >      mag: '胡'
+  >    }
+  >    }
+  >    ```
+  >
+  >    
+  >
+  > 2. v-model做数据双向绑定的原理(仿一个v-model指令)：
+  >
+  > ```vue
+  > <template>
+  >   <div>
+  >     <input type="text" v-test="msg">
+  >   </div>
+  > </template>
+  > 
+  > <script>
+  > 
+  > export default {
+  >   data() {
+  >     return {
+  >       msg: '胡鹭斌'
+  >     }
+  >   },
+  >   directives: {
+  > 
+  >     test: {
+  >       // el是指令绑定的dom元素.binding能够获取到指令传入的数据。vnode.context能够获取到当前组件的实例this。
+  >       bind(el, binding, vnode) {
+  >           // console.log(binding.modifiers) // 这个对象里是指令修饰符
+  >           
+  >         el.value = binding.value
+  >         // 刚开始绑定时给注册事件，第一次调用这个函数
+  >         el.oninput = (e) => {
+  >           // binding.expression是msg字符串
+  >           vnode.context[binding.expression] = e.target.value
+  >         }
+  >       },
+  >       // 当传入的数据变化时就会调用这个函数，接下来都是调用这个
+  >       update(el, binding) {
+  >         el.value = binding.value
+  >       }
+  >     }
+  > 
+  >   }
+  > }
+  > </script>
+  > ```
+
++ **属性修饰符.sync（组件通信）**
+
+  + .sync的作用跟v-model一样，都是使父子组件数据保持同步，原理也一样，都用在组件标签上。
+    + ![image-20220318170240910](img/image-20220318170240910.png)
+    + ![image-20220318170344074](img/image-20220318170344074.png)
+  + .sync和v-model的区别：
+    + 在一个组件标签上，.sync可以使用多次，而v-model只能使用一次。
+
++ **$attrs接受父组件向子组件传递的自定义属性和属性值（组件通信）**
+
+  父组件
+
+  ```vue
+  <template>
+    <div>
+      <h1>父组件</h1>
+      <!-- 对el-button进行二次封装。因此，type,size,icon对于Mybutton组件都是自定义属性。
+      需要在组件里用props接收，也可以用组件的$attrs属性接收，它是一个对象，包含没有被props接收的
+      自定义属性和自定义属性值。 -->
+      <Mybutton type="primary" size="mini" icon="el-icon-edit"></Mybutton>
+    </div>
+  </template>
+  
+  <script>
+  import Mybutton from '@/components/EventTest/'
+  
+  export default {
+    data() {
+      return {
+      }
+    },
+    components: {
+      Mybutton
+    }
+  }
+  </script>
+  
+  <style>
+  
+  </style>
+  
+  ```
+
+  子组件
+
+  ```vue
+  <template>
+    <div>
+      <!-- 正常情况下要这么写 -->
+     <!-- <el-button :type="type" :size="$attrs.size" :icon="$attrs.icon"></el-button> -->
+  
+     <!-- 但是可以这么简写 -->
+     <!-- 由于type是通过props接收的，不能使用v-bind的形式。 -->
+     <!-- v-bind="$attrs"的作用就是把从父组件接收过来的自定义属性和属性值，直接以size="mini" icon="el-icon-edit"形式作用在标签上。 -->
+     <el-button :type="type" v-bind="$attrs"></el-button>
+    </div>
+  </template>
+  
+  <script>
+  export default {
+    data() {
+      return {
+  
+      }
+    },
+    mounted() {
+        // 是组件实例的属性
+      console.log(this.$attrs)
+      // {size: 'mini', icon: 'el-icon-edit'}
+      // 如果子组件有props数据接收父组件传递过来的数据，那么this.$attrs这个对象就不会有已经被props接收的数据。
+    },
+    // props接收当前组件的type自定义属性，被它接收了，this.$attrs就不会再次接收，它只会接收props剩下的自定义属性和属性值
+    props: ['type'],
+    methods: {
+  
+    }
+  
+  }
+  </script>
+  
+  <style>
+  
+  </style>
+  ```
+
++ **$listeners子组件接收父组件传递的事件和事件回调（组件通信）**
+
+  父组件
+
+  ```vue
+  <template>
+    <div>
+      <h1>父组件</h1>
+      <!-- 对el-button进行二次封装。click是自定义事件，可以在父组件向子组件传递自定义事件和事件回调。 -->
+      <Mybutton @click="handler"></Mybutton>
+    </div>
+  </template>
+  
+  <script>
+  import Mybutton from '@/components/EventTest/'
+  
+  export default {
+    data() {
+      return {
+      }
+    },
+    components: {
+      Mybutton
+    },
+    methods: {
+      handler() {
+        console.log(123)
+      }
+    }
+  }
+  </script>
+  
+  <style>
+  
+  </style>
+  
+  ```
+
+  子组件
+
+  ```vue
+  <template>
+    <div>
+  
+      <!-- 接收父组件传递过来的事件和事件回调，绑定到el-button上，只是接收事件和是事件回调拿来用，所以不用
+      使用$emit去触发自定义事件。 -->
+     <el-button type="primary" v-on="$listeners"></el-button>
+    </div>
+  </template>
+  
+  <script>
+  export default {
+    data() {
+      return {
+  
+      }
+    },
+    mounted() {
+      // 是组件实例的属性
+      console.log(this.$listeners)
+      // 父组件传递过来的事件和事件回调  {click: ƒ}
+    },
+    methods: {
+  
+    }
+  
+  }
+  </script>
+  
+  <style>
+  
+  </style>
+  
+  ```
+
++ **$children和$parent（组件通信）**
+
+  + 在父组件获取子组件的两种方式：
+
+    + $children可以获取到父组件里的子组件，是一个数组，数组元素为子组件。注意：不要使用`this.$children[0]`的形式获取到子组件，因为如果子组件太多的话，索引号可能会出错。可以用数组遍历的方式。
+
+      ```js
+        // 这个数组包含所有的子组件
+            this.$children.forEach((item) => {
+              // 获取子组件的属性
+              console.log(item.msg)
+            })
+      ```
+
+      
+
+    + ref既可以获取到dom节点，也可以获取到组件的实例对象，进而获取组件实例的方式和属性。
+
+      ```js
+      this.$refs.xxx.属性或者方法
+      ```
+
+  + 在子组件获取父组件实例：
+
+    ```js
+    this.$parent.属性或者方法
+    ```
+
++ **mixin混入**
+
++ **插槽（组件通信）**
+
+  + 默认插槽
+  
+    子组件
+  
+    ```vue
+    <template>
+      <div class="son-container">
+        <h3>子组件</h3>
+        <!-- 默认插槽 -->
+        <slot>这是如果使用组件时，没有插入结构，就展示的内容</slot>
+      </div>
+    </template>
+    
+    <script>
+    export default {
+      data() {
+        return {
+          msg: 'son2'
+        }
+      }
+    }
+    </script>
+    
+    <style scoped>
+    .son-container {
+      background: gray;
+    }
+    </style>
+    
+    ```
+  
+    父组件
+  
+    ```vue
+    <template>
+      <div>
+        <h2>父组件</h2>
+        <Son>
+          <!-- 由于子组件只有一个插槽，所以就不用指定插入的结构要放在哪个插槽 -->
+          <p>这是插入默认插槽的内容</p>
+        </Son>
+      </div>
+    </template>
+    
+    <script>
+    import Son from '@/components/Son/'
+    
+    export default {
+      data() {
+        return {
+        }
+      },
+      components: {
+        Son
+      },
+      methods: {
+        getSon() {
+    
+        }
+      }
+    }
+    </script>
+    
+    <style>
+    
+    </style>
+    
+    ```
+  
+  + 具名插槽
+  
+    子组件
+  
+    ```vue
+    <template>
+      <div class="son-container">
+        <h3>子组件</h3>
+        <!-- 具名插槽，就是每一个插槽都有指定名字 -->
+        <slot name="s1"></slot>
+        <slot name="s2"></slot>
+        <slot name="s3"></slot>
+      </div>
+    </template>
+    
+    <script>
+    export default {
+      data() {
+        return {
+          msg: 'son2'
+        }
+      }
+    }
+    </script>
+    
+    <style scoped>
+    .son-container {
+      background: gray;
+    }
+    </style>
+    
+    ```
+  
+    父组件
+  
+    ```vue
+    <template>
+      <div>
+        <h2>父组件</h2>
+        <Son>
+    
+          <!-- 老版本vue指定结构填入哪个插槽的写法 -->
+          <p slot="s1">插入到s1的具名插槽</p>
+    
+          <!-- 新版本是这么写的，以后都这么写。使用v-slot指令和template结合的写法。
+          也可以在template上写slot属性指定插入到哪个插槽，不建议，是老版本的写法。 -->
+          <template v-slot:s2>
+           <p>插入到s2的具名插槽</p>
+          </template>
+    
+          <!-- 下面是v-slot:的简写，用#代替 -->
+          <template #s3>
+           <p>这是插入到s3的具名插槽</p>
+          </template>
+    
+        </Son>
+      </div>
+    </template>
+    
+    <script>
+    import Son from '@/components/Son/'
+    
+    export default {
+      data() {
+        return {
+        }
+      },
+      components: {
+        Son
+      },
+      methods: {
+        getSon() {
+    
+        }
+      }
+    }
+    </script>
+    
+    <style>
+    
+    </style>
+    
+    ```
+  
+  + 作用域插槽
+  
+    子组件
+  
+    ```vue
+    <template>
+      <div class="son-container">
+        <h3>子组件</h3>
+        <ul>
+          <li v-for="(item, index) in list" :key="index">
+            <slot name="sss" :staritem="item"></slot>
+          </li>
+        </ul>
+    
+      </div>
+    </template>
+    
+    <script>
+    export default {
+      props: ['list']
+    }
+    </script>
+    
+    <style scoped>
+    .son-container {
+      background: gray;
+    }
+    </style>
+    
+    ```
+  
+    父组件
+  
+    ```vue
+    <template>
+      <div>
+        <h2>父组件</h2>
+        <!-- 把数据从父组件传递给子组件，子组件在里面遍历完了，把对应的数据每一项通过作用域插槽给回流到父组件，
+        让父组件决定数组遍历时每一项的结构样式。比如，element-ui的表格组件就是这个原理。 -->
+        <Son :list="list">
+          <!-- 作用域插槽的写法必须要有template，把子组件的数据回流传到父组件。 -->
+    
+          <!-- 写法一：老版本的写法，不建议，看得懂就可以。 -->
+          <!-- obj是一个对象，随便起名，对象的属性是定义插槽时从子组件传到父组件的:staritem="item"的staritem，
+          对象的属性值就是item -->
+          <template slot="sss" scope="obj">
+           <h1>{{obj.staritem.star}}</h1>
+          </template>
+    
+          <!-- 写法二：也是老版本的写法，看得懂就行 -->
+          <template slot="sss" slot-scope="obj">
+            <a style="color:red">{{obj.staritem.star}}</a>
+          </template>
+    
+          <!-- 写法三：这个是最新的写法，以后都用这个写法。 -->
+          <template v-slot:sss="obj">
+            <span style="color:blue">{{obj.staritem.star}}</span>
+          </template>
+    
+          <!-- 写法四：下面是最新写法的简写 -->
+          <template #sss="obj">
+            <span style="color:yellow">{{obj.staritem.star}}</span>
+          </template>
+        </Son>
+      </div>
+    </template>
+    
+    <script>
+    import Son from '@/components/Son/'
+    
+    export default {
+      data() {
+        return {
+          list: [
+            { star: '杜兰特', money: 4000 },
+            { star: '乔丹', money: 5000 },
+            { star: '科比', money: 3000 },
+            { star: '欧文', money: 2000 },
+            { star: '詹姆斯', money: 1000 }
+          ]
+        }
+      },
+      components: {
+        Son
+      }
+    }
+    </script>
+    
+    <style>
+    
+    </style>
+    
+    ```
+  
 + 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+​		
 
 
 
@@ -7790,6 +10773,8 @@ let obj = {name: 'hulubin'}
 ```
 
 ### git（详细版，以后都看这里）
+
+> ==合并分支是合并修改产生的部分，而不是合并代码。==
 
 + 为什么要使用版本控制？
 
@@ -10259,35 +13244,35 @@ for(var k in obj) {
   >          console.log(i);
   >        }
   >      }
-  >                            
+  >                                                                                                            
   >      arr[0]() // 2
   >      arr[1]() // 2
-  >                            
+  >                                                                                                            
   >      // 上面的代码可以如下拆解:
   >      // 假设用{}代表一次循环体
   >      // 第一次循环
   >      {
-  >                            
+  >                                                                                                            
   >        var i = 0
   >        arr[0] = function() {
   >          console.log(i);
   >        }
   >        i++
-  >                            
+  >                                                                                                            
   >      }
   >    
   >    
   >      // 第二次循环
   >      {
-  >                            
+  >                                                                                                            
   >        var i = 1 // i已经是1
   >        arr[1] = function() {
   >          console.log(i);
   >        }
   >        i++ //循环结束i是2
-  >                            
+  >                                                                                                            
   >      }
-  >                            
+  >                                                                                                            
   >      // 由于使用var声明变量没有块级作用域，i是全局作用域下的全局变量。
   >      // 当循环结束调用函数，i是全局作用域的全局变量，且每次循环体的i都是同一个作用域下的变量，就会被覆盖。
   >    
@@ -10679,12 +13664,52 @@ for(var k in obj) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // 3. 可以调用函数
     const fn = () => 123
     var s = `我是${ fn() }`
     console.log(s); // 我是123
 
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
